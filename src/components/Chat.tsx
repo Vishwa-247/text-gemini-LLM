@@ -23,6 +23,9 @@ const modelNames = {
   claude: 'Claude',
 };
 
+// OpenAI API key hardcoded for development purposes only
+const OPENAI_API_KEY = "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";
+
 const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +45,40 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const sendMessageToOpenAI = async (userMessage: string) => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            ...messages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            { role: 'user', content: userMessage }
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to get response from OpenAI');
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error: any) {
+      console.error('Error calling OpenAI API:', error);
+      throw new Error(`Failed to get response: ${error.message}`);
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
@@ -57,45 +94,54 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // Check if API key is available
-    const apiKeyMap = {
-      chatgpt: apiKeys.openai,
-      gemini: apiKeys.gemini,
-      claude: apiKeys.anthropic,
-    };
-
-    if (!apiKeyMap[selectedModel]) {
-      toast({
-        title: "API Key Required",
-        description: `Please set your ${modelNames[selectedModel]} API key in settings.`,
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // This is where you'd make the API call to your Flask backend
-      // For now, just simulate a response
-      setTimeout(() => {
+      if (selectedModel === 'chatgpt') {
+        // Call OpenAI API
+        const responseText = await sendMessageToOpenAI(content);
+        
         const assistantMessage: Message = {
           id: nanoid(),
           role: 'assistant',
-          content: `This is a simulated response from ${modelNames[selectedModel]}. In the real implementation, this would be handled by the Flask backend connecting to the ${modelNames[selectedModel]} API.`,
+          content: responseText,
           timestamp: new Date(),
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
-        setIsLoading(false);
-      }, 1000);
+      } else {
+        // For other models, check if API key exists
+        const apiKeyMap = {
+          gemini: apiKeys.gemini,
+          claude: apiKeys.anthropic,
+        };
 
-    } catch (error) {
+        if (!apiKeyMap[selectedModel]) {
+          toast({
+            title: "API Key Required",
+            description: `Please set your ${modelNames[selectedModel]} API key in settings.`,
+            variant: "destructive",
+          });
+        } else {
+          // Simulate response for other models (will be implemented later)
+          setTimeout(() => {
+            const assistantMessage: Message = {
+              id: nanoid(),
+              role: 'assistant',
+              content: `This is a simulated response from ${modelNames[selectedModel]}. The integration with this model is not yet implemented.`,
+              timestamp: new Date(),
+            };
+
+            setMessages((prev) => [...prev, assistantMessage]);
+          }, 1000);
+        }
+      }
+    } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again later.",
+        description: error.message || "Failed to send message. Please try again later.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };

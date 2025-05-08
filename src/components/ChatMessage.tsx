@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ReactMarkdown from 'react-markdown';
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
@@ -54,7 +55,11 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
       
       <div className="flex-1 prose prose-slate dark:prose-invert max-w-none">
         <div className={cn("assistant-message", isUser && "user-message")}>
-          <p>{message.content}</p>
+          {isUser ? (
+            <p>{message.content}</p>
+          ) : (
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          )}
         </div>
       </div>
     </div>
