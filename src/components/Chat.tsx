@@ -23,8 +23,9 @@ const modelNames = {
   claude: 'Claude',
 };
 
-// OpenAI API key hardcoded for development purposes only
+// API keys hardcoded for development purposes only
 const OPENAI_API_KEY = "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";
+const GEMINI_API_KEY = "AIzaSyD7H1yePFJWYW3zdtk7LktQz7WpBfU9LLc";
 
 const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -79,6 +80,47 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
     }
   };
 
+  const sendMessageToGemini = async (userMessage: string) => {
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY,
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: userMessage
+                }
+              ],
+              role: "user"
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to get response from Gemini');
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } catch (error: any) {
+      console.error('Error calling Gemini API:', error);
+      throw new Error(`Failed to get response: ${error.message}`);
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
@@ -95,45 +137,38 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
     setIsLoading(true);
 
     try {
+      let responseText;
+      
       if (selectedModel === 'chatgpt') {
         // Call OpenAI API
-        const responseText = await sendMessageToOpenAI(content);
-        
-        const assistantMessage: Message = {
-          id: nanoid(),
-          role: 'assistant',
-          content: responseText,
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
+        responseText = await sendMessageToOpenAI(content);
+      } else if (selectedModel === 'gemini') {
+        // Call Gemini API
+        responseText = await sendMessageToGemini(content);
       } else {
-        // For other models, check if API key exists
-        const apiKeyMap = {
-          gemini: apiKeys.gemini,
-          claude: apiKeys.anthropic,
-        };
-
-        if (!apiKeyMap[selectedModel]) {
+        // For Claude model, check if API key exists
+        if (!apiKeys.anthropic) {
           toast({
             title: "API Key Required",
             description: `Please set your ${modelNames[selectedModel]} API key in settings.`,
             variant: "destructive",
           });
+          setIsLoading(false);
+          return;
         } else {
-          // Simulate response for other models (will be implemented later)
-          setTimeout(() => {
-            const assistantMessage: Message = {
-              id: nanoid(),
-              role: 'assistant',
-              content: `This is a simulated response from ${modelNames[selectedModel]}. The integration with this model is not yet implemented.`,
-              timestamp: new Date(),
-            };
-
-            setMessages((prev) => [...prev, assistantMessage]);
-          }, 1000);
+          // Simulate response for Claude (will be implemented later)
+          responseText = `This is a simulated response from ${modelNames[selectedModel]}. The integration with this model is not yet implemented.`;
         }
       }
+      
+      const assistantMessage: Message = {
+        id: nanoid(),
+        role: 'assistant',
+        content: responseText,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
