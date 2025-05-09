@@ -6,6 +6,8 @@ import ChatInput from './ChatInput';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Menu } from "lucide-react";
+import { sendChatMessage } from "@/services/api";
+import ThemeSelector from './ThemeSelector';
 
 interface ChatProps {
   selectedModel: 'chatgpt' | 'gemini' | 'claude';
@@ -23,13 +25,10 @@ const modelNames = {
   claude: 'Claude',
 };
 
-// API keys hardcoded for development purposes only
-const OPENAI_API_KEY = "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";
-const GEMINI_API_KEY = "AIzaSyD7H1yePFJWYW3zdtk7LktQz7WpBfU9LLc";
-
 const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -40,85 +39,11 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
   // Reset chat when model changes
   useEffect(() => {
     setMessages([]);
+    setConversationId(undefined);
   }, [selectedModel]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const sendMessageToOpenAI = async (userMessage: string) => {
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            ...messages.map(msg => ({
-              role: msg.role,
-              content: msg.content
-            })),
-            { role: 'user', content: userMessage }
-          ],
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to get response from OpenAI');
-      }
-
-      const data = await response.json();
-      return data.choices[0].message.content;
-    } catch (error: any) {
-      console.error('Error calling OpenAI API:', error);
-      throw new Error(`Failed to get response: ${error.message}`);
-    }
-  };
-
-  const sendMessageToGemini = async (userMessage: string) => {
-    try {
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_API_KEY,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: userMessage
-                }
-              ],
-              role: "user"
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to get response from Gemini');
-      }
-
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    } catch (error: any) {
-      console.error('Error calling Gemini API:', error);
-      throw new Error(`Failed to get response: ${error.message}`);
-    }
   };
 
   const handleSendMessage = async (content: string) => {
@@ -137,34 +62,23 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
     setIsLoading(true);
 
     try {
-      let responseText;
+      // Send message to backend
+      const response = await sendChatMessage({
+        model: selectedModel,
+        message: content,
+        conversation_id: conversationId
+      });
       
-      if (selectedModel === 'chatgpt') {
-        // Call OpenAI API
-        responseText = await sendMessageToOpenAI(content);
-      } else if (selectedModel === 'gemini') {
-        // Call Gemini API
-        responseText = await sendMessageToGemini(content);
-      } else {
-        // For Claude model, check if API key exists
-        if (!apiKeys.anthropic) {
-          toast({
-            title: "API Key Required",
-            description: `Please set your ${modelNames[selectedModel]} API key in settings.`,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        } else {
-          // Simulate response for Claude (will be implemented later)
-          responseText = `This is a simulated response from ${modelNames[selectedModel]}. The integration with this model is not yet implemented.`;
-        }
+      // Save conversation ID for future messages
+      if (response.conversation_id) {
+        setConversationId(response.conversation_id);
       }
       
+      // Create assistant message from response
       const assistantMessage: Message = {
         id: nanoid(),
         role: 'assistant',
-        content: responseText,
+        content: response.response,
         timestamp: new Date(),
       };
 
@@ -194,7 +108,9 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
             {modelNames[selectedModel]}
           </span>
         </h1>
-        <div className="w-9" /> {/* This is to ensure the title stays centered */}
+        <div className="flex items-center space-x-2">
+          <ThemeSelector />
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto scrollbar-custom">
