@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ReactMarkdown from 'react-markdown';
+import { useRef, useEffect } from 'react';
+import gsap from 'gsap';
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
@@ -33,9 +35,30 @@ const ModelAvatar = ({ modelName }: { modelName: string }) => {
 
 const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
   const isUser = message.role === 'user';
+  const messageRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (messageRef.current) {
+      // Set initial state for GSAP animation
+      gsap.set(messageRef.current, {
+        opacity: 0,
+        y: 10
+      });
+      
+      // Animate the message
+      gsap.to(messageRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power2.out",
+        delay: 0.1
+      });
+    }
+  }, []);
   
   return (
     <div 
+      ref={messageRef}
       className={cn(
         "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear",
         isUser ? "bg-chat-user" : "bg-chat-assistant"

@@ -1,88 +1,73 @@
 
-# Studymate AI Chat Application
+# Chat Application with AI Integration
 
-This project is a full-stack AI chat application that uses OpenAI, Gemini, and Claude APIs to provide career coaching assistance. It saves conversation history in MongoDB and allows users to switch between different AI models.
-
-## Project Structure
-
-```
-studymate-chat/
-├── backend/
-│   ├── app.py                 # Flask entry point
-│   ├── routers/
-│   │   └── chat.py            # Chat API endpoints
-│   ├── services/
-│   │   ├── openai_service.py  # OpenAI integration
-│   │   ├── gemini_service.py  # Google Gemini integration
-│   │   └── claude_service.py  # Anthropic Claude integration
-│   ├── models/
-│   │   └── chat_history.py    # Data models
-│   ├── database/
-│   │   └── mongodb.py         # MongoDB connection and operations
-│   └── requirements.txt       # Backend dependencies
-└── src/                       # Frontend React application
-    └── components/            # React components
-```
-
-## Setup Instructions
-
-### Backend Setup
-
-1. Install MongoDB
-   ```bash
-   # For macOS with homebrew
-   brew tap mongodb/brew
-   brew install mongodb-community
-
-   # For Windows, download from MongoDB website
-   # Then run MongoDB as a service
-   ```
-
-2. Install Python dependencies
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-
-3. Start the Flask server
-   ```bash
-   cd backend
-   python app.py
-   ```
-
-### Frontend Setup
-
-1. Install Node.js dependencies
-   ```bash
-   npm install
-   ```
-
-2. Start the development server
-   ```bash
-   npm run dev
-   ```
-
-3. Access the application at http://localhost:5173
+A modern chat interface application that integrates with multiple AI services (ChatGPT, Gemini, Claude) and provides chat session persistence using MongoDB.
 
 ## Features
 
-- Chat with multiple AI models (GPT-4, Gemini, Claude)
-- Save and retrieve chat history
-- Switch between AI models
-- Create new conversations
-- Delete old conversations
+- Clean, responsive UI with smooth GSAP animations
+- Support for multiple AI chat models
+- Persistent chat history with MongoDB
+- Ability to switch between different conversations
+- Mobile-friendly design
 
-## Environment Variables
+## Setup Instructions
 
-The backend uses these environment variables (or hardcoded defaults):
+### 1. Backend Setup
 
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `GEMINI_API_KEY`: Your Google Gemini API key 
-- `ANTHROPIC_API_KEY`: Your Anthropic Claude API key
-- `MONGO_URI`: MongoDB connection string (defaults to "mongodb://localhost:27017/")
+```bash
+# Navigate to the backend directory
+cd backend
 
-## MongoDB Structure
+# Install the required Python packages
+pip install -r requirements.txt
 
-The application uses two collections:
-1. `chat_boxes`: Stores chat metadata (title, model, timestamps)
-2. `chat_messages`: Stores individual messages linked to chats
+# Make sure MongoDB is running
+# Start the Flask server
+python app.py
+```
+
+### 2. Frontend Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+### Environment Variables
+
+Create a `.env` file in the backend directory with the following variables:
+
+```
+# API Keys
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# MongoDB
+MONGO_URI=mongodb://localhost:27017/
+DB_NAME=studymate_db
+
+# Model Names
+OPENAI_MODEL=gpt-4o-mini
+ANTHROPIC_MODEL=claude-3-sonnet-20240229
+GEMINI_MODEL=gemini-1.5-pro
+```
+
+## Usage
+
+1. Select your preferred AI model in the sidebar (ChatGPT, Gemini, or Claude)
+2. Start a new conversation by clicking "New Chat"
+3. Type your message in the input box at the bottom
+4. View your chat history in the sidebar
+5. Click on any previous chat to continue the conversation
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, TailwindCSS, GSAP animations
+- **Backend**: Flask, Python
+- **Database**: MongoDB
+- **AI Services**: OpenAI (ChatGPT), Google (Gemini), Anthropic (Claude)

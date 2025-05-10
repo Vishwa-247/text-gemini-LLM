@@ -5,10 +5,11 @@ import ChatMessage, { Message, MessageRole } from './ChatMessage';
 import ChatInput from './ChatInput';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Menu } from "lucide-react";
+import { MessageSquare, Menu, Loader2 } from "lucide-react";
 import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
 import ThemeSelector from './ThemeSelector';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMessageAnimation, useEmptyStateAnimation } from '@/hooks/use-gsap-animations';
 
 interface ChatProps {
   selectedModel: ModelType;
@@ -40,9 +41,14 @@ const Chat = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const emptyStateRef = useEmptyStateAnimation();
+  
+  // Use GSAP animation for messages
+  useMessageAnimation('.message-appear', 0.1);
 
   // Query to get chat history if a chatId is provided
-  const { data: chatHistory } = useQuery({
+  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
     queryFn: () => {
       if (!chatId) return Promise.resolve([]);
@@ -72,7 +78,10 @@ const Chat = ({
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use a timeout to ensure the scrolling happens after the DOM is updated
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const handleSendMessage = async (content: string) => {
@@ -128,7 +137,7 @@ const Chat = ({
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen chat-container">
       <header className="border-b border-border p-4 flex items-center justify-between">
         <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="lg:hidden">
           <Menu className="h-5 w-5" />
@@ -145,16 +154,18 @@ const Chat = ({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto scrollbar-custom">
-        {messages.length === 0 ? (
+      <div className="flex-1 overflow-y-auto scrollbar-custom messages-container" ref={messagesContainerRef}>
+        {isLoadingHistory ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center space-y-4">
-              <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground" />
-              <h2 className="text-xl font-semibold">Start a conversation</h2>
-              <p className="text-muted-foreground max-w-sm">
-                Send a message to start chatting with {modelNames[selectedModel]}.
-              </p>
-            </div>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : messages.length === 0 ? (
+          <div ref={emptyStateRef} className="no-history-container">
+            <MessageSquare className="h-12 w-12 mb-4 text-muted-foreground" />
+            <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
+            <p className="text-muted-foreground max-w-sm text-center">
+              Send a message to start chatting with {modelNames[selectedModel]}.
+            </p>
           </div>
         ) : (
           <div className="pt-4">
@@ -176,7 +187,9 @@ const Chat = ({
         )}
       </div>
 
-      <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+      <div className="message-input-container">
+        <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+      </div>
     </div>
   );
 };

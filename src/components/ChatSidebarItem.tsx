@@ -1,61 +1,95 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { MessageSquare, Trash2 } from "lucide-react";
 import { ModelType } from '@/services/api';
-import { Button } from '@/components/ui/button';
+import { useRef, useEffect } from 'react';
+import gsap from 'gsap';
 
 interface ChatSidebarItemProps {
   id: string;
   title: string;
   model: ModelType;
-  isActive: boolean;
+  isActive?: boolean;
   onClick: () => void;
   onDelete: () => void;
+  animationDelay?: number;
 }
 
-const modelIcons = {
+const modelIcons: Record<ModelType, string> = {
   chatgpt: '🤖',
   gemini: '🔮',
   claude: '🧠',
 };
 
-const ChatSidebarItem: React.FC<ChatSidebarItemProps> = ({
-  id,
-  title,
-  model,
-  isActive,
+const ChatSidebarItem = ({ 
+  id, 
+  title, 
+  model, 
+  isActive = false,
   onClick,
-  onDelete
-}) => {
+  onDelete,
+  animationDelay = 0
+}: ChatSidebarItemProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const itemRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (itemRef.current) {
+      // Set initial state for GSAP animation
+      gsap.set(itemRef.current, {
+        opacity: 0,
+        x: -10
+      });
+      
+      // Animate the sidebar item
+      gsap.to(itemRef.current, {
+        opacity: 1,
+        x: 0,
+        duration: 0.3,
+        ease: "power2.out",
+        delay: animationDelay
+      });
+    }
+  }, [animationDelay]);
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete();
   };
 
+  // Trim the title if it's too long
+  const displayTitle = title.length > 25
+    ? title.substring(0, 25) + '...'
+    : title;
+
   return (
     <div
-      onClick={onClick}
-      className={cn(
-        "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors",
-        isActive 
-          ? "bg-sidebar-primary text-sidebar-primary-foreground" 
-          : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-      )}
+      ref={itemRef}
+      className={`relative flex items-center sidebar-item-appear ${isActive ? 'bg-sidebar-accent rounded-md' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center gap-2 truncate">
-        <span className="text-lg">{modelIcons[model] || '💬'}</span>
-        <span className="truncate">{title}</span>
-      </div>
-      
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-6 w-6 opacity-50 hover:opacity-100"
-        onClick={handleDelete}
+      <Button
+        variant="ghost"
+        className="w-full justify-start gap-2 text-sm overflow-hidden"
+        onClick={onClick}
       >
-        <Trash2 className="h-4 w-4" />
+        <span className="text-lg flex-shrink-0">{modelIcons[model] || '💬'}</span>
+        <span className="truncate">{displayTitle}</span>
       </Button>
+      
+      {(isHovered || isActive) && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-1 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          onClick={handleDelete}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete chat</span>
+        </Button>
+      )}
     </div>
   );
 };

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatSidebarItem from './ChatSidebarItem';
 import { ModelType } from '@/services/api';
+import { useSidebarItemAnimation } from '@/hooks/use-gsap-animations';
 
 export interface ChatSession {
   _id: string;
@@ -57,6 +58,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onDeleteChat,
   isLoading
 }) => {
+  // Use animation hook to animate sidebar items
+  useSidebarItemAnimation('.sidebar-item-appear', 0.2);
+
   return (
     <>
       <div 
@@ -76,7 +80,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         <div className="p-4">
           <Button 
             variant="outline" 
-            className="w-full justify-start gap-2 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80"
+            className="w-full justify-start gap-2 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 sidebar-item-appear"
             onClick={onNewChat}
           >
             <Plus className="w-4 h-4" />
@@ -84,14 +88,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </Button>
         </div>
         
-        <div className="px-2 py-2">
+        <div className="px-2 py-2 sidebar-item-appear">
           <h2 className="px-2 text-lg font-semibold">Select Model</h2>
           <div className="mt-2 space-y-1">
             {models.map((model) => (
               <Button
                 key={model.id}
                 variant={selectedModel === model.id ? "secondary" : "ghost"}
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 sidebar-item-appear"
                 onClick={() => onSelectModel(model.id)}
               >
                 <span className="text-lg">{model.icon}</span>
@@ -101,7 +105,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </div>
         </div>
         
-        <div className="px-2 py-2">
+        <div className="px-2 py-2 sidebar-item-appear">
           <h2 className="px-2 text-lg font-semibold">Chat History</h2>
           <ScrollArea className="h-[400px] mt-2">
             <div className="space-y-1 pr-2">
@@ -112,7 +116,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               ) : chats.length === 0 ? (
                 <p className="text-center text-muted-foreground p-2">No chat history</p>
               ) : (
-                chats.map(chat => (
+                chats.map((chat, index) => (
                   <ChatSidebarItem 
                     key={chat._id}
                     id={chat._id}
@@ -121,6 +125,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     isActive={currentChatId === chat._id}
                     onClick={() => onSelectChat(chat._id, chat.model)}
                     onDelete={() => onDeleteChat(chat._id)}
+                    animationDelay={index * 0.05}
                   />
                 ))
               )}
@@ -128,7 +133,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </ScrollArea>
         </div>
         
-        <div className="mt-auto p-4 border-t border-sidebar-border">
+        <div className="mt-auto p-4 border-t border-sidebar-border sidebar-item-appear">
           <Button 
             variant="ghost" 
             className="w-full justify-start gap-2"
