@@ -1,13 +1,15 @@
-
 import os
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
+from dotenv import load_dotenv
 
-# MongoDB connection - replace with your actual connection string
-# For local development, use: "mongodb://localhost:27017/"
+# Load environment variables
+load_dotenv()
+
+# MongoDB connection from environment variables
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-DB_NAME = "studymate_db"
+DB_NAME = os.getenv("DB_NAME", "studymate_db")
 
 # Collections
 CHATS_COLLECTION = "chat_boxes"

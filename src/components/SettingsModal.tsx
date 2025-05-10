@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SettingsProps {
   open: boolean;
@@ -38,9 +40,17 @@ const SettingsModal = ({
   onSaveApiKeys
 }: SettingsProps) => {
   const [keys, setKeys] = useState(apiKeys);
+  const [useServerKeys, setUseServerKeys] = useState(true);
+  const { toast } = useToast();
   
   const handleSave = () => {
     onSaveApiKeys(keys);
+    toast({
+      title: "Settings saved",
+      description: useServerKeys 
+        ? "Using server-side API keys." 
+        : "Your API keys have been saved to local storage.",
+    });
     onOpenChange(false);
   };
 
@@ -55,36 +65,49 @@ const SettingsModal = ({
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="openai-key">OpenAI API Key</Label>
-            <Input
-              id="openai-key"
-              type="password"
-              value={keys.openai}
-              onChange={(e) => setKeys({ ...keys, openai: e.target.value })}
-              placeholder="sk-..."
+          <div className="flex items-center justify-between">
+            <Label htmlFor="use-server-keys">Use server-side API keys</Label>
+            <Switch 
+              id="use-server-keys" 
+              checked={useServerKeys} 
+              onCheckedChange={setUseServerKeys} 
             />
           </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="gemini-key">Google Gemini API Key</Label>
-            <Input
-              id="gemini-key"
-              type="password"
-              value={keys.gemini}
-              onChange={(e) => setKeys({ ...keys, gemini: e.target.value })}
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="anthropic-key">Anthropic API Key</Label>
-            <Input
-              id="anthropic-key"
-              type="password"
-              value={keys.anthropic}
-              onChange={(e) => setKeys({ ...keys, anthropic: e.target.value })}
-            />
-          </div>
+
+          {!useServerKeys && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="openai-key">OpenAI API Key</Label>
+                <Input
+                  id="openai-key"
+                  type="password"
+                  value={keys.openai}
+                  onChange={(e) => setKeys({ ...keys, openai: e.target.value })}
+                  placeholder="sk-..."
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="gemini-key">Google Gemini API Key</Label>
+                <Input
+                  id="gemini-key"
+                  type="password"
+                  value={keys.gemini}
+                  onChange={(e) => setKeys({ ...keys, gemini: e.target.value })}
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="anthropic-key">Anthropic API Key</Label>
+                <Input
+                  id="anthropic-key"
+                  type="password"
+                  value={keys.anthropic}
+                  onChange={(e) => setKeys({ ...keys, anthropic: e.target.value })}
+                />
+              </div>
+            </>
+          )}
           
           <div className="grid gap-2">
             <Label htmlFor="theme">Theme</Label>

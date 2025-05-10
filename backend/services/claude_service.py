@@ -1,10 +1,14 @@
 
 import anthropic
 import os
+from dotenv import load_dotenv
 
-# API key
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "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")
-ANTHROPIC_MODEL = "claude-3-sonnet-20240229"
+# Load environment variables
+load_dotenv()
+
+# API key from environment variables
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-sonnet-20240229")
 
 def ask_claude(messages):
     # Create the client
