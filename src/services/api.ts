@@ -68,7 +68,7 @@ export const sendChatMessage = async (request: ChatRequest): Promise<ChatRespons
 export const getChats = async (): Promise<Chat[]> => {
   try {
     const response = await apiClient.get<ChatsResponse>('/chats');
-    return response.data.chats;
+    return response.data.chats || [];
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.error) {
       throw new Error(error.response.data.error);
@@ -81,7 +81,7 @@ export const getChats = async (): Promise<Chat[]> => {
 export const getChatHistory = async (chatId: string, limit = 50): Promise<ChatMessage[]> => {
   try {
     const response = await apiClient.get<ChatHistoryResponse>(`/chats/${chatId}?limit=${limit}`);
-    return response.data.messages;
+    return response.data.messages || [];
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.error) {
       throw new Error(error.response.data.error);

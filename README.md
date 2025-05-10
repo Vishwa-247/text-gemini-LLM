@@ -1,98 +1,88 @@
 
 # Studymate AI Chat Application
 
-This is a chat application that integrates with multiple AI providers (OpenAI, Google Gemini, Anthropic Claude) and stores chat history in MongoDB.
+This project is a full-stack AI chat application that uses OpenAI, Gemini, and Claude APIs to provide career coaching assistance. It saves conversation history in MongoDB and allows users to switch between different AI models.
 
 ## Project Structure
 
-- `src/` - Frontend React application
-- `server/` - Backend Flask API
-- `server/llm_clients/` - AI service integrations
-- `server/db/` - MongoDB integration
-
-## Prerequisites
-
-1. Node.js and npm (or yarn)
-2. Python 3.7+ and pip
-3. MongoDB installed locally or a MongoDB Atlas account
+```
+studymate-chat/
+├── backend/
+│   ├── app.py                 # Flask entry point
+│   ├── routers/
+│   │   └── chat.py            # Chat API endpoints
+│   ├── services/
+│   │   ├── openai_service.py  # OpenAI integration
+│   │   ├── gemini_service.py  # Google Gemini integration
+│   │   └── claude_service.py  # Anthropic Claude integration
+│   ├── models/
+│   │   └── chat_history.py    # Data models
+│   ├── database/
+│   │   └── mongodb.py         # MongoDB connection and operations
+│   └── requirements.txt       # Backend dependencies
+└── src/                       # Frontend React application
+    └── components/            # React components
+```
 
 ## Setup Instructions
 
-### 1. Install MongoDB
+### Backend Setup
 
-**On Windows:**
-1. Download MongoDB Community Server from the [official website](https://www.mongodb.com/try/download/community)
-2. Follow the installation wizard
-3. MongoDB should run as a service automatically
+1. Install MongoDB
+   ```bash
+   # For macOS with homebrew
+   brew tap mongodb/brew
+   brew install mongodb-community
 
-**On macOS:**
-```bash
-brew tap mongodb/brew
-brew install mongodb-community
-brew services start mongodb-community
-```
+   # For Windows, download from MongoDB website
+   # Then run MongoDB as a service
+   ```
 
-### 2. Set up Backend
+2. Install Python dependencies
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-1. Navigate to the server directory:
-```bash
-cd server
-```
+3. Start the Flask server
+   ```bash
+   cd backend
+   python app.py
+   ```
 
-2. Create a virtual environment:
-```bash
-python -m venv venv
-```
+### Frontend Setup
 
-3. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - macOS/Linux: `source venv/bin/activate`
+1. Install Node.js dependencies
+   ```bash
+   npm install
+   ```
 
-4. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. Start the development server
+   ```bash
+   npm run dev
+   ```
 
-5. Start the Flask server:
-```bash
-python app.py
-```
-The Flask server will run on http://localhost:5000
+3. Access the application at http://localhost:5173
 
-### 3. Set up Frontend
+## Features
 
-1. In another terminal, navigate to the project root
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-The frontend will run on http://localhost:5173
-
-## MongoDB Management
-
-You can use MongoDB Compass (a GUI tool) to visualize and manage your database:
-1. Download [MongoDB Compass](https://www.mongodb.com/products/compass)
-2. Connect to your MongoDB instance (default: `mongodb://localhost:27017/`)
-3. You should see the `studymate_db` database with `chat_boxes` and `chat_messages` collections
-
-## API Endpoints
-
-- `POST /api/chat` - Send a chat message
-- `GET /api/chats` - Get all chats
-- `GET /api/chats/:id` - Get messages for a specific chat
-- `DELETE /api/chats/:id` - Delete a chat and its messages
+- Chat with multiple AI models (GPT-4, Gemini, Claude)
+- Save and retrieve chat history
+- Switch between AI models
+- Create new conversations
+- Delete old conversations
 
 ## Environment Variables
 
-For production, create a `.env` file in the server directory with:
-```
-MONGO_URI=your_mongodb_connection_string
-OPENAI_API_KEY=your_openai_key
-GEMINI_API_KEY=your_gemini_key
-ANTHROPIC_API_KEY=your_claude_key
-```
+The backend uses these environment variables (or hardcoded defaults):
+
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `GEMINI_API_KEY`: Your Google Gemini API key 
+- `ANTHROPIC_API_KEY`: Your Anthropic Claude API key
+- `MONGO_URI`: MongoDB connection string (defaults to "mongodb://localhost:27017/")
+
+## MongoDB Structure
+
+The application uses two collections:
+1. `chat_boxes`: Stores chat metadata (title, model, timestamps)
+2. `chat_messages`: Stores individual messages linked to chats

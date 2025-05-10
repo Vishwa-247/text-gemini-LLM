@@ -1,51 +1,62 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus, Settings, Users } from "lucide-react";
+import { MessageSquare, Plus, Settings } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import ChatSidebarItem from './ChatSidebarItem';
+import { ModelType } from '@/services/api';
 
-type AIModel = 'chatgpt' | 'gemini' | 'claude';
-
-interface ModelOption {
-  id: AIModel;
-  name: string;
-  icon: React.ReactNode;
+export interface ChatSession {
+  _id: string;
+  title: string;
+  model: ModelType;
 }
 
-const models: ModelOption[] = [
-  {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    icon: <MessageSquare className="w-4 h-4" />
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    icon: <MessageSquare className="w-4 h-4" />
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    icon: <MessageSquare className="w-4 h-4" />
-  }
-];
-
 interface ChatSidebarProps {
-  selectedModel: AIModel;
-  onSelectModel: (model: AIModel) => void;
+  selectedModel: ModelType;
+  onSelectModel: (model: ModelType) => void;
   onNewChat: () => void;
   onOpenSettings: () => void;
   isMobileSidebarOpen: boolean;
   onCloseMobileSidebar: () => void;
+  chats: ChatSession[];
+  currentChatId?: string;
+  onSelectChat: (chatId: string, model: ModelType) => void;
+  onDeleteChat: (chatId: string) => void;
+  isLoading: boolean;
 }
 
-const ChatSidebar = ({
+const models: {id: ModelType; name: string; icon: string}[] = [
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    icon: '🤖'
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini',
+    icon: '🔮'
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    icon: '🧠'
+  }
+];
+
+const ChatSidebar: React.FC<ChatSidebarProps> = ({
   selectedModel,
   onSelectModel,
   onNewChat,
   onOpenSettings,
   isMobileSidebarOpen,
-  onCloseMobileSidebar
-}: ChatSidebarProps) => {
+  onCloseMobileSidebar,
+  chats,
+  currentChatId,
+  onSelectChat,
+  onDeleteChat,
+  isLoading
+}) => {
   return (
     <>
       <div 
@@ -73,8 +84,9 @@ const ChatSidebar = ({
           </Button>
         </div>
         
-        <div className="flex-1 overflow-y-auto scrollbar-custom p-2">
-          <div className="space-y-2">
+        <div className="px-2 py-2">
+          <h2 className="px-2 text-lg font-semibold">Select Model</h2>
+          <div className="mt-2 space-y-1">
             {models.map((model) => (
               <Button
                 key={model.id}
@@ -82,14 +94,41 @@ const ChatSidebar = ({
                 className="w-full justify-start gap-2"
                 onClick={() => onSelectModel(model.id)}
               >
-                {model.icon}
+                <span className="text-lg">{model.icon}</span>
                 {model.name}
               </Button>
             ))}
           </div>
         </div>
         
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="px-2 py-2">
+          <h2 className="px-2 text-lg font-semibold">Chat History</h2>
+          <ScrollArea className="h-[400px] mt-2">
+            <div className="space-y-1 pr-2">
+              {isLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : chats.length === 0 ? (
+                <p className="text-center text-muted-foreground p-2">No chat history</p>
+              ) : (
+                chats.map(chat => (
+                  <ChatSidebarItem 
+                    key={chat._id}
+                    id={chat._id}
+                    title={chat.title}
+                    model={chat.model}
+                    isActive={currentChatId === chat._id}
+                    onClick={() => onSelectChat(chat._id, chat.model)}
+                    onDelete={() => onDeleteChat(chat._id)}
+                  />
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+        
+        <div className="mt-auto p-4 border-t border-sidebar-border">
           <Button 
             variant="ghost" 
             className="w-full justify-start gap-2"
