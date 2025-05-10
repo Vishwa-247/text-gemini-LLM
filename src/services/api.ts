@@ -14,6 +14,12 @@ const apiClient = axios.create({
 
 export type ModelType = 'chatgpt' | 'gemini' | 'claude';
 
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: string;
+}
+
 interface ChatRequest {
   model: ModelType;
   message: string;
@@ -23,6 +29,25 @@ interface ChatRequest {
 interface ChatResponse {
   response: string;
   conversation_id: string;
+  error?: string;
+}
+
+interface Chat {
+  _id: string;
+  user_id: string;
+  title: string;
+  model: ModelType;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ChatsResponse {
+  chats: Chat[];
+  error?: string;
+}
+
+interface ChatHistoryResponse {
+  messages: ChatMessage[];
   error?: string;
 }
 
@@ -36,5 +61,44 @@ export const sendChatMessage = async (request: ChatRequest): Promise<ChatRespons
       throw new Error(error.response.data.error);
     }
     throw new Error('Failed to connect to the server');
+  }
+};
+
+// Get all chats for the current user
+export const getChats = async (): Promise<Chat[]> => {
+  try {
+    const response = await apiClient.get<ChatsResponse>('/chats');
+    return response.data.chats;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to fetch chats');
+  }
+};
+
+// Get chat history for a specific conversation
+export const getChatHistory = async (chatId: string, limit = 50): Promise<ChatMessage[]> => {
+  try {
+    const response = await apiClient.get<ChatHistoryResponse>(`/chats/${chatId}?limit=${limit}`);
+    return response.data.messages;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to fetch chat history');
+  }
+};
+
+// Delete a chat
+export const deleteChat = async (chatId: string): Promise<boolean> => {
+  try {
+    const response = await apiClient.delete(`/chats/${chatId}`);
+    return response.data.success;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to delete chat');
   }
 };

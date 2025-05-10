@@ -6,16 +6,19 @@ import ChatInput from './ChatInput';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Menu } from "lucide-react";
-import { sendChatMessage } from "@/services/api";
+import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
 import ThemeSelector from './ThemeSelector';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface ChatProps {
-  selectedModel: 'chatgpt' | 'gemini' | 'claude';
+  selectedModel: ModelType;
   apiKeys: {
     openai: string;
     gemini: string;
     anthropic: string;
   };
+  chatId?: string;
+  onChatIdChange: (chatId: string) => void;
   onToggleSidebar: () => void;
 }
 
@@ -25,22 +28,48 @@ const modelNames = {
   claude: 'Claude',
 };
 
-const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
+const Chat = ({ 
+  selectedModel, 
+  apiKeys, 
+  chatId, 
+  onChatIdChange,
+  onToggleSidebar 
+}: ChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Query to get chat history if a chatId is provided
+  const { data: chatHistory } = useQuery({
+    queryKey: ['chatHistory', chatId],
+    queryFn: () => {
+      if (!chatId) return Promise.resolve([]);
+      return getChatHistory(chatId);
+    },
+    enabled: !!chatId,
+  });
+
+  // Convert chat history to messages format
+  useEffect(() => {
+    if (chatHistory && chatHistory.length > 0) {
+      const formattedMessages = chatHistory.map(msg => ({
+        id: nanoid(),
+        role: msg.role as MessageRole,
+        content: msg.content,
+        timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+      }));
+      setMessages(formattedMessages);
+    } else if (!chatId) {
+      // Clear messages when starting a new chat
+      setMessages([]);
+    }
+  }, [chatHistory, chatId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  // Reset chat when model changes
-  useEffect(() => {
-    setMessages([]);
-    setConversationId(undefined);
-  }, [selectedModel]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,12 +95,15 @@ const Chat = ({ selectedModel, apiKeys, onToggleSidebar }: ChatProps) => {
       const response = await sendChatMessage({
         model: selectedModel,
         message: content,
-        conversation_id: conversationId
+        conversation_id: chatId
       });
       
-      // Save conversation ID for future messages
-      if (response.conversation_id) {
-        setConversationId(response.conversation_id);
+      // Update chatId if this is a new conversation
+      if (response.conversation_id && (!chatId || chatId !== response.conversation_id)) {
+        onChatIdChange(response.conversation_id);
+        
+        // Invalidate chats query to refresh the sidebar
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
       }
       
       // Create assistant message from response
