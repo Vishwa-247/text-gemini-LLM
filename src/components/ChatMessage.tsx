@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ReactMarkdown from 'react-markdown';
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
+import { useTheme } from "@/contexts/ThemeContext";
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
@@ -36,6 +37,7 @@ const ModelAvatar = ({ modelName }: { modelName: string }) => {
 const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
   const isUser = message.role === 'user';
   const messageRef = useRef<HTMLDivElement>(null);
+  const { theme, colors } = useTheme();
   
   useEffect(() => {
     if (messageRef.current) {
@@ -63,6 +65,9 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
         "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear w-full",
         isUser ? "bg-chat-user" : "bg-chat-assistant"
       )}
+      style={{ 
+        backgroundColor: isUser ? colors.chat.user : colors.chat.assistant 
+      }}
     >
       <div className="flex-shrink-0 mt-1">
         {isUser ? (

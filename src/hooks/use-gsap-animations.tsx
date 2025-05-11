@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 
 // Hook for animating chat messages
@@ -119,17 +119,45 @@ export const useSendButtonAnimation = () => {
 export const useScrollToBottom = (dependencies: any[] = []) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      const { scrollHeight, clientHeight } = containerRef.current;
+      
+      gsap.to(containerRef.current, {
+        scrollTop: scrollHeight - clientHeight,
+        duration: 0.3,
+        ease: "power2.out"
+      });
     }
-  };
+  }, []);
   
   useEffect(() => {
     scrollToBottom();
   }, [...dependencies]);
   
   return { containerRef, scrollToBottom };
+};
+
+// Loading dots animation hook
+export const useLoadingDotsAnimation = () => {
+  const dotsRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (dotsRef.current) {
+      const dots = dotsRef.current.children;
+      
+      gsap.to(dots, {
+        scale: 1.2,
+        opacity: 1,
+        stagger: 0.2,
+        repeat: -1,
+        yoyo: true,
+        duration: 0.5
+      });
+    }
+  }, []);
+  
+  return dotsRef;
 };
 
 // New hook for toast animation

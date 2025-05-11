@@ -48,14 +48,15 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     // Auto-resize textarea
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 200); // Limit max height
+      textareaRef.current.style.height = `${newHeight}px`;
     }
   };
 
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="max-w-3xl mx-auto w-full"
+      className="w-full max-w-3xl mx-auto px-4 md:px-0"
     >
       <div className="relative">
         <Textarea

@@ -24,7 +24,7 @@ interface ChatProps {
 }
 
 const modelNames = {
-  chatgpt: 'ChatGPT',
+  chatgpt: 'MyGpt',
   gemini: 'Gemini',
   claude: 'Claude',
 };
@@ -72,6 +72,11 @@ const Chat = ({
     }
   }, [chatHistory, chatId]);
 
+  // Effect to scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
@@ -115,7 +120,7 @@ const Chat = ({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-      // Scroll will be triggered by the useEffect with messages dependency
+      // Scroll will be triggered by the useEffect
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -172,16 +177,22 @@ const Chat = ({
               />
             ))}
             {isLoading && (
-              <div className="py-6 px-4 md:px-6 lg:px-8 flex items-center gap-4 animate-pulse">
-                <div className="h-8 w-8 rounded-full bg-muted"></div>
-                <div className="h-4 w-20 bg-muted rounded"></div>
+              <div className="py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 animate-pulse">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="h-8 w-8 rounded-full bg-primary/30"></div>
+                </div>
+                <div className="flex flex-col gap-2 w-full max-w-2xl">
+                  <div className="h-4 w-2/3 bg-muted rounded"></div>
+                  <div className="h-4 w-1/2 bg-muted rounded"></div>
+                  <div className="h-4 w-3/4 bg-muted rounded"></div>
+                </div>
               </div>
             )}
           </div>
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 pb-4 pt-6 px-4 bg-gradient-to-t from-background via-background to-transparent">
+      <div className="absolute bottom-0 left-0 right-0 pb-4 pt-6 px-2 sm:px-4 bg-gradient-to-t from-background via-background to-transparent">
         <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
       </div>
     </div>
