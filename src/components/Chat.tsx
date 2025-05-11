@@ -1,15 +1,15 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import ChatMessage, { Message, MessageRole } from './ChatMessage';
 import ChatInput from './ChatInput';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Menu, Loader2 } from "lucide-react";
 import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
 import ThemeSelector from './ThemeSelector';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMessageAnimation, useEmptyStateAnimation } from '@/hooks/use-gsap-animations';
+import { useMessageAnimation, useEmptyStateAnimation, useScrollToBottom } from '@/hooks/use-gsap-animations';
 
 interface ChatProps {
   selectedModel: ModelType;
@@ -38,11 +38,10 @@ const Chat = ({
 }: ChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const emptyStateRef = useEmptyStateAnimation();
+  const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
   // Use GSAP animation for messages
   useMessageAnimation('.message-appear', 0.1);
@@ -73,17 +72,6 @@ const Chat = ({
     }
   }, [chatHistory, chatId]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    // Use a timeout to ensure the scrolling happens after the DOM is updated
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
@@ -98,6 +86,9 @@ const Chat = ({
     // Add the user message to the conversation
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+    
+    // Scroll to bottom after adding user message
+    scrollToBottom();
 
     try {
       // Send message to backend
@@ -124,6 +115,7 @@ const Chat = ({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      // Scroll will be triggered by the useEffect with messages dependency
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -137,8 +129,8 @@ const Chat = ({
   };
 
   return (
-    <div className="flex flex-col h-screen chat-container">
-      <header className="border-b border-border p-4 flex items-center justify-between">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <header className="border-b border-border p-4 flex items-center justify-between shrink-0 z-10">
         <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="lg:hidden">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle menu</span>
@@ -154,13 +146,16 @@ const Chat = ({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto scrollbar-custom messages-container" ref={messagesContainerRef}>
+      <div 
+        className="flex-1 overflow-y-auto scrollbar-custom relative" 
+        ref={containerRef}
+      >
         {isLoadingHistory ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : messages.length === 0 ? (
-          <div ref={emptyStateRef} className="no-history-container">
+          <div ref={emptyStateRef} className="h-full flex flex-col items-center justify-center opacity-0 transform scale-95">
             <MessageSquare className="h-12 w-12 mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
             <p className="text-muted-foreground max-w-sm text-center">
@@ -168,7 +163,7 @@ const Chat = ({
             </p>
           </div>
         ) : (
-          <div className="pt-4">
+          <div className="pt-4 pb-36">
             {messages.map((message) => (
               <ChatMessage 
                 key={message.id} 
@@ -182,12 +177,11 @@ const Chat = ({
                 <div className="h-4 w-20 bg-muted rounded"></div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
 
-      <div className="message-input-container">
+      <div className="absolute bottom-0 left-0 right-0 pb-4 pt-6 px-4 bg-gradient-to-t from-background via-background to-transparent">
         <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
       </div>
     </div>

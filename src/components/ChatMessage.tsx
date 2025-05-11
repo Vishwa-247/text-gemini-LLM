@@ -42,7 +42,7 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
       // Set initial state for GSAP animation
       gsap.set(messageRef.current, {
         opacity: 0,
-        y: 10
+        y: 20
       });
       
       // Animate the message
@@ -60,7 +60,7 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
     <div 
       ref={messageRef}
       className={cn(
-        "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear",
+        "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear w-full",
         isUser ? "bg-chat-user" : "bg-chat-assistant"
       )}
     >
@@ -76,12 +76,12 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
         )}
       </div>
       
-      <div className="flex-1 prose prose-slate dark:prose-invert max-w-none">
-        <div className={cn("assistant-message", isUser && "user-message")}>
+      <div className="flex-1 prose prose-slate dark:prose-invert max-w-none overflow-hidden">
+        <div className={cn("message", isUser ? "user-message" : "assistant-message")}>
           {isUser ? (
-            <p>{message.content}</p>
+            <p className="whitespace-pre-wrap">{message.content}</p>
           ) : (
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown className="whitespace-pre-wrap">{message.content}</ReactMarkdown>
           )}
         </div>
       </div>

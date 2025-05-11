@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
+import { useSendButtonAnimation } from "@/hooks/use-gsap-animations";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -11,12 +12,26 @@ interface ChatInputProps {
 
 const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   const [message, setMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendButtonRef = useSendButtonAnimation();
+
+  useEffect(() => {
+    // Auto-focus textarea when component mounts
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
       onSendMessage(message);
       setMessage("");
+      
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     }
   };
 
@@ -26,22 +41,34 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       handleSubmit(e);
     }
   };
+  
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+    
+    // Auto-resize textarea
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
 
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="border-t border-border bg-background/95 backdrop-blur p-4"
+      className="max-w-3xl mx-auto w-full"
     >
-      <div className="relative flex items-end max-w-3xl mx-auto">
+      <div className="relative">
         <Textarea
+          ref={textareaRef}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
           placeholder="Message..."
-          className="resize-none pr-12 min-h-[60px] max-h-[200px] bg-secondary"
+          className="resize-none pr-12 min-h-[60px] max-h-[200px] bg-secondary rounded-md w-full overflow-y-auto"
           disabled={disabled}
         />
         <Button
+          ref={sendButtonRef}
           type="submit"
           size="icon"
           disabled={!message.trim() || disabled}
