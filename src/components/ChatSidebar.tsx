@@ -8,19 +8,8 @@ import NewChatButton from './sidebar/NewChatButton';
 import ModelSelector from './sidebar/ModelSelector';
 import ChatHistoryList from './sidebar/ChatHistoryList';
 import SidebarFooter from './sidebar/SidebarFooter';
-
-export interface ChatSession {
-  _id: string;
-  title: string;
-  model: ModelType;
-}
-
-interface CustomModel {
-  name: string;
-  id: string;
-  apiEndpoint: string;
-  apiKey: string;
-}
+import { SidebarProvider, ChatSession } from './sidebar/SidebarProvider';
+import { useSidebar } from './sidebar/SidebarProvider';
 
 interface ChatSidebarProps {
   selectedModel: ModelType;
@@ -36,7 +25,7 @@ interface ChatSidebarProps {
   isLoading: boolean;
 }
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({
+const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
   selectedModel,
   onSelectModel,
   onNewChat,
@@ -51,27 +40,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 }) => {
   // Use animation hook to animate sidebar items
   useSidebarItemAnimation('.sidebar-item-appear', 0.2);
-  const [customModels, setCustomModels] = React.useState<CustomModel[]>([]);
-  const [isAddModelOpen, setIsAddModelOpen] = React.useState(false);
-
-  // Load custom models from localStorage
-  React.useEffect(() => {
-    const savedModels = localStorage.getItem('custom-models');
-    if (savedModels) {
-      try {
-        setCustomModels(JSON.parse(savedModels));
-      } catch (e) {
-        console.error('Failed to load custom models:', e);
-      }
-    }
-  }, []);
-
-  // Save custom models to localStorage
-  const saveCustomModel = (model: CustomModel) => {
-    const updatedModels = [...customModels, model];
-    setCustomModels(updatedModels);
-    localStorage.setItem('custom-models', JSON.stringify(updatedModels));
-  };
+  const { isAddModelOpen, setIsAddModelOpen, customModels, saveCustomModel } = useSidebar();
 
   return (
     <>
@@ -117,6 +86,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         onSave={saveCustomModel}
       />
     </>
+  );
+};
+
+const ChatSidebar: React.FC<ChatSidebarProps> = (props) => {
+  return (
+    <SidebarProvider>
+      <ChatSidebarContent {...props} />
+    </SidebarProvider>
   );
 };
 
