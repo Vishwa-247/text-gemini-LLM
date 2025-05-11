@@ -1,180 +1,125 @@
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-// Hook for animating chat messages
-export const useMessageAnimation = (selector: string, delay: number = 0) => {
+export const useMessageAnimation = (selector: string, staggerTime: number = 0.1) => {
   useEffect(() => {
     const elements = document.querySelectorAll(selector);
-    
-    gsap.fromTo(elements, 
-      { opacity: 0, y: 15 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.4,
-        stagger: 0.1,
-        ease: "power2.out",
-        delay
-      }
-    );
-  }, [selector, delay]);
+    if (elements && elements.length > 0) {
+      gsap.fromTo(
+        elements,
+        { 
+          y: 20, 
+          opacity: 0 
+        },
+        { 
+          y: 0, 
+          opacity: 1, 
+          stagger: staggerTime, 
+          duration: 0.4, 
+          ease: "power2.out",
+          clearProps: "all"
+        }
+      );
+    }
+  }, [selector, staggerTime]);
 };
 
-// Hook for animating sidebar items
-export const useSidebarItemAnimation = (selector: string, delay: number = 0) => {
+export const useSidebarItemAnimation = (selector: string, staggerTime: number = 0.05) => {
   useEffect(() => {
     const elements = document.querySelectorAll(selector);
-    
-    gsap.fromTo(elements, 
-      { opacity: 0, x: -15 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.3,
-        stagger: 0.05,
-        ease: "power2.out",
-        delay
-      }
-    );
-  }, [selector, delay]);
+    if (elements && elements.length > 0) {
+      gsap.fromTo(
+        elements,
+        { 
+          x: -20, 
+          opacity: 0 
+        },
+        { 
+          x: 0, 
+          opacity: 1, 
+          stagger: staggerTime, 
+          duration: 0.3, 
+          ease: "power2.out",
+          delay: 0.1,
+          clearProps: "all"
+        }
+      );
+    }
+  }, [selector, staggerTime]);
 };
 
-// Hook for empty state animation
 export const useEmptyStateAnimation = () => {
   const elementRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (elementRef.current) {
-      gsap.fromTo(elementRef.current, 
-        { opacity: 0, scale: 0.95 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-          delay: 0.2
-        }
-      );
+      gsap.to(elementRef.current, {
+        opacity: 1, 
+        scale: 1,
+        duration: 0.5,
+        ease: "back.out(1.7)",
+        delay: 0.2
+      });
     }
   }, []);
   
   return elementRef;
 };
 
-// Hook for input send button animation
 export const useSendButtonAnimation = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   
   useEffect(() => {
-    if (buttonRef.current) {
-      const button = buttonRef.current;
-      
-      // Hover animation
-      button.addEventListener('mouseenter', () => {
-        gsap.to(button, {
-          scale: 1.05,
-          duration: 0.2
-        });
+    if (!buttonRef.current) return;
+    
+    const button = buttonRef.current;
+    
+    const enterAnimation = () => {
+      gsap.to(button, {
+        scale: 1.1,
+        duration: 0.2,
+        ease: "power1.inOut"
       });
-      
-      button.addEventListener('mouseleave', () => {
-        gsap.to(button, {
-          scale: 1,
-          duration: 0.2
-        });
+    };
+    
+    const leaveAnimation = () => {
+      gsap.to(button, {
+        scale: 1,
+        duration: 0.2,
+        ease: "power1.inOut"
       });
-      
-      // Click animation
-      button.addEventListener('mousedown', () => {
-        gsap.to(button, {
-          scale: 0.95,
-          duration: 0.1
-        });
-      });
-      
-      button.addEventListener('mouseup', () => {
-        gsap.to(button, {
-          scale: 1,
-          duration: 0.1
-        });
-      });
-    }
+    };
+    
+    button.addEventListener("mouseenter", enterAnimation);
+    button.addEventListener("mouseleave", leaveAnimation);
     
     return () => {
-      if (buttonRef.current) {
-        const button = buttonRef.current;
-        button.removeEventListener('mouseenter', () => {});
-        button.removeEventListener('mouseleave', () => {});
-        button.removeEventListener('mousedown', () => {});
-        button.removeEventListener('mouseup', () => {});
-      }
+      button.removeEventListener("mouseenter", enterAnimation);
+      button.removeEventListener("mouseleave", leaveAnimation);
     };
   }, []);
   
   return buttonRef;
 };
 
-// New hook for message container scrolling management
 export const useScrollToBottom = (dependencies: any[] = []) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  const scrollToBottom = useCallback(() => {
+
+  const scrollToBottom = () => {
     if (containerRef.current) {
       const { scrollHeight, clientHeight } = containerRef.current;
-      
       gsap.to(containerRef.current, {
         scrollTop: scrollHeight - clientHeight,
         duration: 0.3,
         ease: "power2.out"
       });
     }
-  }, []);
-  
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [...dependencies]);
-  
+
   return { containerRef, scrollToBottom };
-};
-
-// Loading dots animation hook
-export const useLoadingDotsAnimation = () => {
-  const dotsRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    if (dotsRef.current) {
-      const dots = dotsRef.current.children;
-      
-      gsap.to(dots, {
-        scale: 1.2,
-        opacity: 1,
-        stagger: 0.2,
-        repeat: -1,
-        yoyo: true,
-        duration: 0.5
-      });
-    }
-  }, []);
-  
-  return dotsRef;
-};
-
-// New hook for toast animation
-export const useToastAnimation = () => {
-  useEffect(() => {
-    const toasts = document.querySelectorAll('.toast');
-    
-    gsap.fromTo(toasts, 
-      { opacity: 0, y: 20, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.3,
-        ease: "back.out(1.7)",
-        stagger: 0.1
-      }
-    );
-  }, []);
 };

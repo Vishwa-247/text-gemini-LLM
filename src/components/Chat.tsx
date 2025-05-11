@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { nanoid } from 'nanoid';
 import ChatMessage, { Message, MessageRole } from './ChatMessage';
 import ChatInput from './ChatInput';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Menu, Loader2 } from "lucide-react";
+import { MessageSquare, Menu } from "lucide-react";
 import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
 import ThemeSelector from './ThemeSelector';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMessageAnimation, useEmptyStateAnimation, useScrollToBottom } from '@/hooks/use-gsap-animations';
+import { useEmptyStateAnimation, useScrollToBottom } from '@/hooks/use-gsap-animations';
 
 interface ChatProps {
   selectedModel: ModelType;
@@ -35,31 +35,28 @@ const Chat = ({
   onChatIdChange,
   onToggleSidebar 
 }: ChatProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const emptyStateRef = useEmptyStateAnimation();
   const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
-  // Use GSAP animation for messages
-  useMessageAnimation('.message-appear', 0.1);
-
-  // Query to get chat history if a chatId is provided
-  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
+  // Query to get chat history if a chatId is provided, with no loading state
+  const { data: chatHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
     queryFn: () => {
       if (!chatId) return Promise.resolve([]);
       return getChatHistory(chatId);
     },
     enabled: !!chatId,
-    staleTime: 0, // Disable caching to always fetch fresh data
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
 
   // Convert chat history to messages format
-  useEffect(() => {
+  React.useEffect(() => {
     if (chatHistory && chatHistory.length > 0) {
       const formattedMessages = chatHistory.map(msg => ({
         id: nanoid(),
@@ -75,7 +72,7 @@ const Chat = ({
   }, [chatHistory, chatId]);
 
   // Effect to scroll to bottom when messages change
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
@@ -131,7 +128,6 @@ const Chat = ({
       // Also invalidate the chat history to keep it updated
       queryClient.invalidateQueries({ queryKey: ['chatHistory', response.conversation_id] });
       
-      // Scroll will be triggered by the useEffect
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -166,11 +162,7 @@ const Chat = ({
         className="flex-1 overflow-y-auto scrollbar-custom relative" 
         ref={containerRef}
       >
-        {isLoadingHistory ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : messages.length === 0 ? (
+        {messages.length === 0 ? (
           <div ref={emptyStateRef} className="h-full flex flex-col items-center justify-center opacity-0 transform scale-95">
             <MessageSquare className="h-12 w-12 mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
@@ -210,8 +202,10 @@ const Chat = ({
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6 px-4 bg-gradient-to-t from-background via-background to-transparent">
-        <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+      <div className="w-full border-t border-border bg-background">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+        </div>
       </div>
     </div>
   );

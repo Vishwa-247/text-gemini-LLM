@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, Settings, PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -69,11 +69,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 }) => {
   // Use animation hook to animate sidebar items
   useSidebarItemAnimation('.sidebar-item-appear', 0.2);
-  const [customModels, setCustomModels] = useState<CustomModel[]>([]);
-  const [isAddModelOpen, setIsAddModelOpen] = useState(false);
+  const [customModels, setCustomModels] = React.useState<CustomModel[]>([]);
+  const [isAddModelOpen, setIsAddModelOpen] = React.useState(false);
 
   // Load custom models from localStorage
-  useEffect(() => {
+  React.useEffect(() => {
     const savedModels = localStorage.getItem('custom-models');
     if (savedModels) {
       try {
@@ -111,7 +111,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
       />
       <aside 
         className={`
-          fixed top-0 left-0 z-50 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col
+          fixed top-0 left-0 z-50 h-full w-[280px] bg-sidebar border-r border-sidebar-border flex flex-col
           transition-transform duration-300 ease-in-out
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:relative lg:z-0
@@ -160,8 +160,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         
         <div className="px-2 py-2 sidebar-item-appear flex-1 overflow-hidden flex flex-col">
           <h2 className="px-2 text-lg font-semibold">Chat History</h2>
-          <ScrollArea className="flex-1 mt-2">
-            <div className="space-y-1 pr-2">
+          <ScrollArea className="flex-1 mt-2 pr-2">
+            <div className="space-y-1">
               {isLoading ? (
                 <div className="flex items-center justify-center p-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -192,7 +192,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             className="w-full justify-start gap-2"
             onClick={onOpenSettings}
           >
-            <Settings className="w-4 w-4" />
+            <Settings className="w-4 h-4" />
             Settings
           </Button>
         </div>

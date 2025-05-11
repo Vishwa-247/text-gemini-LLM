@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
@@ -11,11 +11,11 @@ interface ChatInputProps {
 }
 
 const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
-  const [message, setMessage] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [message, setMessage] = React.useState("");
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const sendButtonRef = useSendButtonAnimation();
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Auto-focus textarea when component mounts
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -58,14 +58,14 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       onSubmit={handleSubmit} 
       className="w-full max-w-3xl mx-auto flex-shrink-0"
     >
-      <div className="relative">
+      <div className="relative bg-background rounded-md border border-input">
         <Textarea
           ref={textareaRef}
           value={message}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
           placeholder="Message..."
-          className="resize-none pr-12 min-h-[60px] max-h-[200px] bg-secondary rounded-md w-full overflow-y-auto"
+          className="resize-none pr-12 min-h-[60px] max-h-[200px] bg-transparent rounded-md w-full overflow-y-auto border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
         />
         <Button
