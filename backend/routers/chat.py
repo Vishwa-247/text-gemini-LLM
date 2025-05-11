@@ -5,6 +5,7 @@ from services.gemini_service import ask_gemini
 from services.claude_service import ask_claude
 from database.mongodb import MongoDB
 from datetime import datetime
+import json
 
 # Initialize MongoDB client
 mongo_db = MongoDB()
@@ -33,6 +34,7 @@ def chat():
     model = data.get('model', 'chatgpt')
     message = data.get('message', '')
     conversation_id = data.get('conversation_id')
+    custom_model_data = data.get('custom_model', None)
     
     try:
         # Create a new conversation if it doesn't exist
@@ -68,6 +70,10 @@ def chat():
             response_text = ask_gemini(conversations_cache[conversation_id])
         elif model == 'claude':
             response_text = ask_claude(conversations_cache[conversation_id])
+        elif custom_model_data:
+            # This is a placeholder for custom model integration
+            # In a real implementation, you would use the custom_model_data to make API calls
+            response_text = f"Response from custom model: {model}. Custom model integration is in development."
         else:
             return jsonify({"error": "Unsupported model"}), 400
         
@@ -134,4 +140,23 @@ def delete_chat(chat_id):
         
     except Exception as e:
         print(f"Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# Route to save custom model configurations
+@chat_router.route('/models/custom', methods=['POST'])
+def save_custom_model():
+    try:
+        data = request.json
+        model_id = data.get('id')
+        model_name = data.get('name')
+        model_endpoint = data.get('apiEndpoint')
+        
+        # In a real implementation, you would store this in the database
+        # For now, just return success
+        return jsonify({
+            "success": True,
+            "message": f"Custom model {model_name} saved successfully"
+        })
+    except Exception as e:
+        print(f"Error saving custom model: {str(e)}")
         return jsonify({"error": str(e)}), 500

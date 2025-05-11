@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import ChatMessage, { Message, MessageRole } from './ChatMessage';
@@ -23,10 +22,10 @@ interface ChatProps {
   onToggleSidebar: () => void;
 }
 
-const modelNames = {
-  chatgpt: 'MyGpt',
-  gemini: 'Gemini',
-  claude: 'Claude',
+const modelNames: Record<string, string> = {
+  'chatgpt': 'ChatGPT',
+  'gemini': 'Gemini',
+  'claude': 'Claude',
 };
 
 const Chat = ({ 
@@ -54,6 +53,9 @@ const Chat = ({
       return getChatHistory(chatId);
     },
     enabled: !!chatId,
+    staleTime: 0, // Disable caching to always fetch fresh data
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Convert chat history to messages format
@@ -76,6 +78,11 @@ const Chat = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // Get display name for the current model
+  const getCurrentModelName = () => {
+    return modelNames[selectedModel] || selectedModel;
+  };
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -120,6 +127,10 @@ const Chat = ({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      
+      // Also invalidate the chat history to keep it updated
+      queryClient.invalidateQueries({ queryKey: ['chatHistory', response.conversation_id] });
+      
       // Scroll will be triggered by the useEffect
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -143,7 +154,7 @@ const Chat = ({
         <h1 className="text-xl font-bold">
           <span className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            {modelNames[selectedModel]}
+            {getCurrentModelName()}
           </span>
         </h1>
         <div className="flex items-center space-x-2">
@@ -163,28 +174,35 @@ const Chat = ({
           <div ref={emptyStateRef} className="h-full flex flex-col items-center justify-center opacity-0 transform scale-95">
             <MessageSquare className="h-12 w-12 mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
-            <p className="text-muted-foreground max-w-sm text-center">
-              Send a message to start chatting with {modelNames[selectedModel]}.
+            <p className="text-muted-foreground max-w-sm text-center px-4">
+              Send a message to start chatting with {getCurrentModelName()}.
             </p>
           </div>
         ) : (
-          <div className="pt-4 pb-36">
+          <div className="pb-36">
             {messages.map((message) => (
               <ChatMessage 
                 key={message.id} 
                 message={message} 
-                modelName={modelNames[selectedModel]}
+                modelName={getCurrentModelName()}
               />
             ))}
             {isLoading && (
-              <div className="py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 animate-pulse">
+              <div className="py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">
-                  <div className="h-8 w-8 rounded-full bg-primary/30"></div>
+                  <div className="h-8 w-8 rounded-full border flex items-center justify-center bg-primary">
+                    <div className="loading-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2 w-full max-w-2xl">
-                  <div className="h-4 w-2/3 bg-muted rounded"></div>
-                  <div className="h-4 w-1/2 bg-muted rounded"></div>
-                  <div className="h-4 w-3/4 bg-muted rounded"></div>
+                <div className="flex-1">
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
                 </div>
               </div>
             )}
@@ -192,7 +210,7 @@ const Chat = ({
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 pb-4 pt-6 px-2 sm:px-4 bg-gradient-to-t from-background via-background to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6 px-4 bg-gradient-to-t from-background via-background to-transparent">
         <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
       </div>
     </div>

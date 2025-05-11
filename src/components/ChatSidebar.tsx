@@ -1,16 +1,25 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus, Settings } from "lucide-react";
+import { MessageSquare, Plus, Settings, PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatSidebarItem from './ChatSidebarItem';
 import { ModelType } from '@/services/api';
 import { useSidebarItemAnimation } from '@/hooks/use-gsap-animations';
+import CustomModelForm from './CustomModelForm';
+import { Separator } from "@/components/ui/separator";
 
 export interface ChatSession {
   _id: string;
   title: string;
   model: ModelType;
+}
+
+interface CustomModel {
+  name: string;
+  id: string;
+  apiEndpoint: string;
+  apiKey: string;
 }
 
 interface ChatSidebarProps {
@@ -27,7 +36,7 @@ interface ChatSidebarProps {
   isLoading: boolean;
 }
 
-const models: {id: ModelType; name: string; icon: string}[] = [
+const defaultModels = [
   {
     id: 'chatgpt',
     name: 'ChatGPT',
@@ -60,6 +69,37 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 }) => {
   // Use animation hook to animate sidebar items
   useSidebarItemAnimation('.sidebar-item-appear', 0.2);
+  const [customModels, setCustomModels] = useState<CustomModel[]>([]);
+  const [isAddModelOpen, setIsAddModelOpen] = useState(false);
+
+  // Load custom models from localStorage
+  useEffect(() => {
+    const savedModels = localStorage.getItem('custom-models');
+    if (savedModels) {
+      try {
+        setCustomModels(JSON.parse(savedModels));
+      } catch (e) {
+        console.error('Failed to load custom models:', e);
+      }
+    }
+  }, []);
+
+  // Save custom models to localStorage
+  const saveCustomModel = (model: CustomModel) => {
+    const updatedModels = [...customModels, model];
+    setCustomModels(updatedModels);
+    localStorage.setItem('custom-models', JSON.stringify(updatedModels));
+  };
+
+  // Combined models
+  const allModels = [
+    ...defaultModels,
+    ...customModels.map(model => ({
+      id: model.id as ModelType,
+      name: model.name,
+      icon: '⚙️'
+    }))
+  ];
 
   return (
     <>
@@ -89,9 +129,20 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
         
         <div className="px-2 py-2 sidebar-item-appear">
-          <h2 className="px-2 text-lg font-semibold">Select Model</h2>
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-lg font-semibold">Models</h2>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={() => setIsAddModelOpen(true)}
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span className="sr-only">Add custom model</span>
+            </Button>
+          </div>
           <div className="mt-2 space-y-1">
-            {models.map((model) => (
+            {allModels.map((model) => (
               <Button
                 key={model.id}
                 variant={selectedModel === model.id ? "secondary" : "ghost"}
@@ -105,9 +156,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </div>
         </div>
         
-        <div className="px-2 py-2 sidebar-item-appear">
+        <Separator className="my-2" />
+        
+        <div className="px-2 py-2 sidebar-item-appear flex-1 overflow-hidden flex flex-col">
           <h2 className="px-2 text-lg font-semibold">Chat History</h2>
-          <ScrollArea className="h-[400px] mt-2">
+          <ScrollArea className="flex-1 mt-2">
             <div className="space-y-1 pr-2">
               {isLoading ? (
                 <div className="flex items-center justify-center p-4">
@@ -139,11 +192,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             className="w-full justify-start gap-2"
             onClick={onOpenSettings}
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 w-4" />
             Settings
           </Button>
         </div>
       </aside>
+      
+      <CustomModelForm
+        open={isAddModelOpen}
+        onOpenChange={setIsAddModelOpen}
+        onSave={saveCustomModel}
+      />
     </>
   );
 };

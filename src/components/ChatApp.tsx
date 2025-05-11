@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import ChatSidebar from './ChatSidebar';
@@ -30,7 +31,7 @@ const ChatApp = () => {
   });
 
   // Query for fetching chats
-  const { data: chats = [], isLoading: isLoadingChats } = useQuery({
+  const { data: chats = [], isLoading: isLoadingChats, refetch: refetchChats } = useQuery({
     queryKey: ['chats'],
     queryFn: getChats,
   });
@@ -41,6 +42,8 @@ const ChatApp = () => {
     onSuccess: () => {
       // Invalidate and refetch chats after deletion
       queryClient.invalidateQueries({ queryKey: ['chats'] });
+      refetchChats();
+      
       toast({
         title: "Chat deleted",
         description: "The chat has been deleted successfully.",
@@ -85,9 +88,6 @@ const ChatApp = () => {
     // Start a new conversation
     setCurrentChatId(undefined);
     
-    // If a model was previously selected from chat history, keep it
-    // Otherwise, use the sidebar-selected model
-    
     // Close the sidebar on mobile
     if (isMobile) {
       setIsSidebarOpen(false);
@@ -107,6 +107,9 @@ const ChatApp = () => {
     if (isMobile) {
       setIsSidebarOpen(false);
     }
+    
+    // Force refresh the chat history
+    queryClient.invalidateQueries({ queryKey: ['chatHistory', chatId] });
   };
 
   const handleDeleteChat = (chatId: string) => {

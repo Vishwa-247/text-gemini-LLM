@@ -64,9 +64,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				chat: {
-					user: '#343541',
-					assistant: '#444654',
-					hover: '#2A2B32'
+					user: 'hsl(var(--chat-user))',
+					assistant: 'hsl(var(--chat-assistant))',
+					hover: 'hsl(var(--sidebar-accent))'
 				}
 			},
 			borderRadius: {

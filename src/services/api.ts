@@ -12,7 +12,7 @@ const apiClient = axios.create({
   },
 });
 
-export type ModelType = 'chatgpt' | 'gemini' | 'claude';
+export type ModelType = 'chatgpt' | 'gemini' | 'claude' | string;
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -20,10 +20,18 @@ export interface ChatMessage {
   timestamp?: string;
 }
 
+export interface CustomModel {
+  id: string;
+  name: string;
+  apiEndpoint: string;
+  apiKey: string;
+}
+
 interface ChatRequest {
   model: ModelType;
   message: string;
   conversation_id?: string;
+  custom_model?: CustomModel;
 }
 
 interface ChatResponse {
@@ -51,9 +59,36 @@ interface ChatHistoryResponse {
   error?: string;
 }
 
+interface CustomModelRequest {
+  id: string;
+  name: string;
+  apiEndpoint: string;
+}
+
+interface CustomModelResponse {
+  success: boolean;
+  message: string;
+  error?: string;
+}
+
 // Send a chat message to the backend
 export const sendChatMessage = async (request: ChatRequest): Promise<ChatResponse> => {
   try {
+    // Check if this is a custom model
+    if (!['chatgpt', 'gemini', 'claude'].includes(request.model)) {
+      // Load custom models from localStorage
+      const customModelsStr = localStorage.getItem('custom-models');
+      if (customModelsStr) {
+        const customModels: CustomModel[] = JSON.parse(customModelsStr);
+        const customModel = customModels.find(m => m.id === request.model);
+        
+        if (customModel) {
+          // Add the custom model details to the request
+          request.custom_model = customModel;
+        }
+      }
+    }
+    
     const response = await apiClient.post<ChatResponse>('/chat', request);
     return response.data;
   } catch (error) {
@@ -100,5 +135,18 @@ export const deleteChat = async (chatId: string): Promise<boolean> => {
       throw new Error(error.response.data.error);
     }
     throw new Error('Failed to delete chat');
+  }
+};
+
+// Save a custom model configuration
+export const saveCustomModel = async (model: CustomModelRequest): Promise<boolean> => {
+  try {
+    const response = await apiClient.post<CustomModelResponse>('/models/custom', model);
+    return response.data.success;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to save custom model');
   }
 };

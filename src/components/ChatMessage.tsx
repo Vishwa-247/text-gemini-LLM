@@ -22,13 +22,10 @@ interface ChatMessageProps {
 }
 
 const ModelAvatar = ({ modelName }: { modelName: string }) => {
-  // We'll use the first letter of the model name for the avatar
-  const firstLetter = modelName.charAt(0).toUpperCase();
-  
   return (
     <Avatar className="h-8 w-8 border">
       <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-        {firstLetter}
+        {modelName.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
@@ -41,13 +38,11 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
   
   useEffect(() => {
     if (messageRef.current) {
-      // Set initial state for GSAP animation
       gsap.set(messageRef.current, {
         opacity: 0,
         y: 20
       });
       
-      // Animate the message
       gsap.to(messageRef.current, {
         opacity: 1,
         y: 0,
@@ -62,7 +57,7 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
     <div 
       ref={messageRef}
       className={cn(
-        "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear w-full",
+        "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear",
         isUser ? "bg-chat-user" : "bg-chat-assistant"
       )}
       style={{ 
@@ -84,9 +79,9 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
       <div className="flex-1 prose prose-slate dark:prose-invert max-w-none overflow-hidden">
         <div className={cn("message", isUser ? "user-message" : "assistant-message")}>
           {isUser ? (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
-            <ReactMarkdown className="whitespace-pre-wrap">{message.content}</ReactMarkdown>
+            <ReactMarkdown className="whitespace-pre-wrap break-words">{message.content}</ReactMarkdown>
           )}
         </div>
       </div>

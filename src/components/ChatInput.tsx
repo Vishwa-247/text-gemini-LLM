@@ -56,7 +56,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-3xl mx-auto px-4 md:px-0"
+      className="w-full max-w-3xl mx-auto flex-shrink-0"
     >
       <div className="relative">
         <Textarea
