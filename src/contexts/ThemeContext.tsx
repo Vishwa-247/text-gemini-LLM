@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import * as React from 'react';
 import { ThemeOption, ThemeColors } from '@/types/theme';
 import { themes } from '@/styles/themes';
 
@@ -9,13 +9,13 @@ interface ThemeContextType {
   colors: ThemeColors;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<ThemeOption>('dark');
+  const [theme, setTheme] = React.useState<ThemeOption>('dark');
   
   // Apply theme colors to CSS variables
-  useEffect(() => {
+  React.useEffect(() => {
     const colors = themes[theme] || themes.dark;
     
     // Apply root variables
@@ -50,7 +50,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
   
   // Load theme from localStorage on initial render
-  useEffect(() => {
+  React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme-preference');
     if (savedTheme && Object.keys(themes).includes(savedTheme)) {
       setTheme(savedTheme as ThemeOption);
@@ -65,7 +65,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
+  const context = React.useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }

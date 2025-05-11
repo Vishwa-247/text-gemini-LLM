@@ -1,9 +1,9 @@
 
+import * as React from 'react';
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ReactMarkdown from 'react-markdown';
-import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -33,10 +33,10 @@ const ModelAvatar = ({ modelName }: { modelName: string }) => {
 
 const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
   const isUser = message.role === 'user';
-  const messageRef = useRef<HTMLDivElement>(null);
+  const messageRef = React.useRef<HTMLDivElement>(null);
   const { theme, colors } = useTheme();
   
-  useEffect(() => {
+  React.useEffect(() => {
     if (messageRef.current) {
       gsap.set(messageRef.current, {
         opacity: 0,
