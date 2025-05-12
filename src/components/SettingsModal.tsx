@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface SettingsProps {
   open: boolean;
@@ -29,8 +29,9 @@ interface SettingsProps {
     openai: string;
     gemini: string;
     anthropic: string;
+    grok: string;
   };
-  onSaveApiKeys: (keys: { openai: string; gemini: string; anthropic: string }) => void;
+  onSaveApiKeys: (keys: { openai: string; gemini: string; anthropic: string; grok: string }) => void;
 }
 
 const SettingsModal = ({ 
@@ -104,6 +105,16 @@ const SettingsModal = ({
                   type="password"
                   value={keys.anthropic}
                   onChange={(e) => setKeys({ ...keys, anthropic: e.target.value })}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="grok-key">Grok API Key</Label>
+                <Input
+                  id="grok-key"
+                  type="password"
+                  value={keys.grok}
+                  onChange={(e) => setKeys({ ...keys, grok: e.target.value })}
                 />
               </div>
             </>

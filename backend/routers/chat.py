@@ -1,8 +1,8 @@
-
 from flask import Blueprint, request, jsonify
 from services.openai_service import ask_openai
 from services.gemini_service import ask_gemini
 from services.claude_service import ask_claude
+from services.grok_service import ask_grok
 from database.mongodb import MongoDB
 from datetime import datetime
 import json
@@ -81,6 +81,8 @@ def chat():
             response_text = ask_gemini(conversations_cache[conversation_id])
         elif model == 'claude':
             response_text = ask_claude(conversations_cache[conversation_id])
+        elif model == 'grok':
+            response_text = ask_grok(conversations_cache[conversation_id])
         elif custom_model_data:
             # This is a placeholder for custom model integration
             # In a real implementation, you would use the custom_model_data to make API calls

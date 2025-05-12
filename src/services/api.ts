@@ -12,7 +12,7 @@ const apiClient = axios.create({
   },
 });
 
-export type ModelType = 'chatgpt' | 'gemini' | 'claude' | string;
+export type ModelType = 'chatgpt' | 'gemini' | 'claude' | 'grok' | string;
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -75,7 +75,7 @@ interface CustomModelResponse {
 export const sendChatMessage = async (request: ChatRequest): Promise<ChatResponse> => {
   try {
     // Check if this is a custom model
-    if (!['chatgpt', 'gemini', 'claude'].includes(request.model)) {
+    if (!['chatgpt', 'gemini', 'claude', 'grok'].includes(request.model)) {
       // Load custom models from localStorage
       const customModelsStr = localStorage.getItem('custom-models');
       if (customModelsStr) {

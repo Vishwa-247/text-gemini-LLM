@@ -25,9 +25,10 @@ const ChatApp = () => {
 
   // State for API keys - in a real app, these would be stored securely
   const [apiKeys, setApiKeys] = useState({
-    openai: '',
-    gemini: '',
-    anthropic: '',
+    openai: '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',
+    gemini: 'AIzaSyCr5e_YREkbM8OXc5XL550wJf8ArohFT_Q',
+    anthropic: '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',
+    grok: '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'
   });
 
   // Query for fetching chats with staleTime to prevent unnecessary loading
@@ -73,6 +74,9 @@ const ChatApp = () => {
       } catch (e) {
         console.error('Failed to parse saved API keys:', e);
       }
+    } else {
+      // Store default API keys if none are saved
+      localStorage.setItem('ai-api-keys', JSON.stringify(apiKeys));
     }
   }, []);
 
@@ -100,6 +104,10 @@ const ChatApp = () => {
     });
   };
 
+  const handleSelectModel = (model: ModelType) => {
+    setSelectedModel(model);
+  };
+
   const handleSelectChat = (chatId: string, model: ModelType) => {
     setCurrentChatId(chatId);
     setSelectedModel(model);
@@ -118,7 +126,7 @@ const ChatApp = () => {
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <ChatSidebar 
         selectedModel={selectedModel}
-        onSelectModel={setSelectedModel}
+        onSelectModel={handleSelectModel}
         onNewChat={handleNewChat}
         onOpenSettings={() => setIsSettingsOpen(true)}
         isMobileSidebarOpen={isSidebarOpen}

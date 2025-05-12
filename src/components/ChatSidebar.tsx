@@ -67,6 +67,7 @@ const ChatSidebarContent = ({
             selectedModel={selectedModel}
             onSelectModel={onSelectModel}
             onAddCustomModel={() => setIsAddModelOpen(true)}
+            onNewChat={onNewChat}
             customModels={customModels}
           />
           
