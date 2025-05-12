@@ -1,3 +1,4 @@
+
 import os
 from pymongo import MongoClient
 from datetime import datetime
@@ -47,19 +48,30 @@ class MongoDB:
                 "timestamp": datetime.utcnow()
             }
             
-            self.messages.insert_one(message_data)
+            result = self.messages.insert_one(message_data)
             
             # Update chat's last updated timestamp
             self.chats.update_one(
                 {"_id": chat_id_obj}, 
                 {"$set": {"updated_at": datetime.utcnow()}}
             )
+            
+            # Update the chat title if it's the first user message
+            if role == "user":
+                message_count = self.messages.count_documents({"chat_id": chat_id_obj})
+                if message_count <= 2:  # Only the system message and this one
+                    title = content[:30] + "..." if len(content) > 30 else content
+                    self.chats.update_one(
+                        {"_id": chat_id_obj},
+                        {"$set": {"title": title}}
+                    )
+                    
             return True
         except Exception as e:
             print(f"Error saving message: {e}")
             return False
     
-    def get_chat_history(self, chat_id, limit=50):
+    def get_chat_history(self, chat_id, limit=100):
         """Get messages for a specific chat with a limit"""
         try:
             chat_id_obj = ObjectId(chat_id)
@@ -79,7 +91,7 @@ class MongoDB:
             print(f"Error getting chat history: {e}")
             return []
     
-    def get_all_chats(self, user_id="anonymous", limit=20):
+    def get_all_chats(self, user_id="anonymous", limit=50):
         """Get all chats for a specific user"""
         try:
             chats = list(self.chats.find(
@@ -105,9 +117,9 @@ class MongoDB:
             self.messages.delete_many({"chat_id": chat_id_obj})
             
             # Delete the chat itself
-            self.chats.delete_one({"_id": chat_id_obj})
+            result = self.chats.delete_one({"_id": chat_id_obj})
             
-            return True
+            return result.deleted_count > 0
         except Exception as e:
             print(f"Error deleting chat: {e}")
             return False

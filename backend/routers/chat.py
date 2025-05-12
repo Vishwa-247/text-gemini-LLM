@@ -42,17 +42,28 @@ def chat():
             conversation_id = mongo_db.create_chat(model=model, title=message[:30])
             # Initialize with system message in cache
             conversations_cache[conversation_id] = [system_message]
+            # Save system message to MongoDB
+            mongo_db.save_message(conversation_id, "system", system_message["content"])
         elif conversation_id not in conversations_cache:
             # Load conversation history from DB to cache
             messages_db = mongo_db.get_chat_history(conversation_id)
             
             # Convert to the format needed by LLM clients
-            conversations_cache[conversation_id] = [system_message]  # Always start with system message
+            conversations_cache[conversation_id] = []
+            has_system_message = False
+            
             for msg in messages_db:
                 conversations_cache[conversation_id].append({
                     "role": msg["role"],
                     "content": msg["content"]
                 })
+                if msg["role"] == "system":
+                    has_system_message = True
+            
+            # Add system message if not present
+            if not has_system_message:
+                conversations_cache[conversation_id].insert(0, system_message)
+                mongo_db.save_message(conversation_id, "system", system_message["content"])
         
         # Add user message to conversation cache
         conversations_cache[conversation_id].append({
@@ -110,7 +121,7 @@ def get_chats():
 def get_chat_history(chat_id):
     try:
         # Get conversation history
-        limit = request.args.get('limit', 50, type=int)
+        limit = request.args.get('limit', 100, type=int)
         messages = mongo_db.get_chat_history(chat_id, limit)
         return jsonify({"messages": messages})
         

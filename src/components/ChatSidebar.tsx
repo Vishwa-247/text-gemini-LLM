@@ -47,20 +47,20 @@ const ChatSidebarContent = ({
   return (
     <>
       <div 
-        className={`fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden ${
+        className={`fixed inset-0 bg-background/80 backdrop-blur-sm z-30 lg:hidden ${
           isMobileSidebarOpen ? 'block' : 'hidden'
         }`}
         onClick={onCloseMobileSidebar}
       />
       <aside 
         className={`
-          fixed top-0 left-0 z-50 h-full w-[280px] bg-sidebar border-r border-sidebar-border flex flex-col
+          fixed top-0 left-0 z-40 h-full w-[280px] bg-sidebar border-r border-sidebar-border flex flex-col
           transition-transform duration-300 ease-in-out
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:relative lg:z-10
         `}
       >
-        <div className="flex flex-col h-full overflow-y-auto">
+        <div className="flex flex-col h-full">
           <NewChatButton onClick={onNewChat} />
           
           <ModelSelector 

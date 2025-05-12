@@ -44,14 +44,25 @@ const Chat = ({
   const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
   // Query to get chat history if a chatId is provided, with optimized settings
-  const { data: chatHistory } = useQuery({
+  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
-    queryFn: () => {
+    queryFn: async () => {
       if (!chatId) return Promise.resolve([]);
-      return getChatHistory(chatId);
+      try {
+        const history = await getChatHistory(chatId);
+        return history;
+      } catch (error) {
+        console.error("Failed to fetch chat history:", error);
+        toast({
+          title: "Error loading chat history",
+          description: "Could not load your previous messages",
+          variant: "destructive",
+        });
+        return [];
+      }
     },
     enabled: !!chatId,
-    staleTime: 60000, // 1 minute
+    staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });
@@ -66,11 +77,12 @@ const Chat = ({
         timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
       }));
       setMessages(formattedMessages);
+      setTimeout(() => scrollToBottom(), 100);
     } else if (!chatId) {
       // Clear messages when starting a new chat
       setMessages([]);
     }
-  }, [chatHistory, chatId]);
+  }, [chatHistory, chatId, scrollToBottom]);
 
   // Effect to scroll to bottom when messages change
   React.useEffect(() => {
@@ -126,6 +138,9 @@ const Chat = ({
 
       setMessages((prev) => [...prev, assistantMessage]);
       
+      // Invalidate the chat history query to ensure it's updated
+      queryClient.invalidateQueries({ queryKey: ['chatHistory', response.conversation_id] });
+      
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -135,6 +150,7 @@ const Chat = ({
       });
     } finally {
       setIsLoading(false);
+      setTimeout(() => scrollToBottom(), 100);
     }
   };
 
@@ -160,7 +176,11 @@ const Chat = ({
         className="flex-1 overflow-y-auto scrollbar-custom relative" 
         ref={containerRef}
       >
-        {messages.length === 0 ? (
+        {isLoadingHistory ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : messages.length === 0 ? (
           <div ref={emptyStateRef} className="h-full flex flex-col items-center justify-center opacity-0 transform scale-95">
             <MessageSquare className="h-12 w-12 mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
