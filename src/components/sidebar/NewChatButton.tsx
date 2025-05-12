@@ -9,10 +9,10 @@ interface NewChatButtonProps {
 
 const NewChatButton: React.FC<NewChatButtonProps> = ({ onClick }) => {
   return (
-    <div className="p-4 opacity-100 visible">
+    <div className="p-4">
       <Button 
         variant="outline" 
-        className="w-full justify-start gap-2 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 sidebar-item-appear"
+        className="w-full justify-start gap-2 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80"
         onClick={onClick}
       >
         <Plus className="w-4 h-4" />

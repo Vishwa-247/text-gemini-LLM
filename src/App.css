@@ -59,20 +59,27 @@
   border-right: 1px solid var(--border);
 }
 
+/* IMPORTANT: Fix for sidebar visibility */
+aside {
+  z-index: 50 !important;
+}
+
+aside .sidebar-item-appear {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+aside > div {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Ensure sidebar is always visible on large screens */
 @media (min-width: 1024px) {
   aside.lg\:translate-x-0 {
     transform: translateX(0) !important;
     display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
   }
-}
-
-/* Make sure sidebar content is visible */
-.sidebar-content {
-  opacity: 1 !important;
-  visibility: visible !important;
 }
 
 /* Media queries for responsive design */
@@ -103,9 +110,4 @@
 /* Prevent content overflow */
 .overflow-x-hidden {
   overflow-x: hidden;
-}
-
-/* Fix the z-index for sidebar */
-aside {
-  z-index: 50 !important;
 }

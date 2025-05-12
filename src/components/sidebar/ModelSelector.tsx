@@ -51,7 +51,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   ];
 
   return (
-    <div className="px-2 py-2 sidebar-item-appear">
+    <div className="px-2 py-2">
       <div className="flex items-center justify-between px-2">
         <h2 className="text-lg font-semibold">Models</h2>
         <Button 
@@ -69,7 +69,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           <Button
             key={model.id}
             variant={selectedModel === model.id ? "secondary" : "ghost"}
-            className="w-full justify-start gap-2 sidebar-item-appear"
+            className="w-full justify-start gap-2"
             onClick={() => onSelectModel(model.id)}
           >
             <span className="text-lg">{model.icon}</span>

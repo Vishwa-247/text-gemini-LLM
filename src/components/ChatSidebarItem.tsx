@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { ModelType } from '@/services/api';
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
@@ -66,7 +66,7 @@ const ChatSidebarItem = ({
   return (
     <div
       ref={itemRef}
-      className={`relative flex items-center sidebar-item-appear ${isActive ? 'bg-sidebar-accent rounded-md' : ''}`}
+      className={`relative flex items-center ${isActive ? 'bg-sidebar-accent rounded-md' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

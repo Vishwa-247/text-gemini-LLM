@@ -57,10 +57,10 @@ const ChatSidebarContent = ({
           fixed top-0 left-0 z-50 h-full w-[280px] bg-sidebar border-r border-sidebar-border flex flex-col
           transition-transform duration-300 ease-in-out
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:relative lg:z-10 overflow-hidden
+          lg:translate-x-0 lg:relative lg:z-10
         `}
       >
-        <div className="flex flex-col h-full w-full overflow-y-auto sidebar-content">
+        <div className="flex flex-col h-full overflow-y-auto">
           <NewChatButton onClick={onNewChat} />
           
           <ModelSelector 

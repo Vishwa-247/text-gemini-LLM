@@ -26,7 +26,7 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = ({
   isLoading
 }) => {
   return (
-    <div className="px-2 py-2 sidebar-item-appear flex-1 overflow-hidden flex flex-col">
+    <div className="px-2 py-2 flex-1 overflow-hidden flex flex-col">
       <h2 className="px-2 text-lg font-semibold">Chat History</h2>
       <ScrollArea className="flex-1 mt-2 pr-2">
         <div className="space-y-1">
