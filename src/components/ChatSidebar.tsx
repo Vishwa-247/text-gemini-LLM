@@ -1,26 +1,16 @@
 
 import * as React from 'react';
-import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus, Settings, PlusCircle } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import ChatSidebarItem from './ChatSidebarItem';
+import { Separator } from "@/components/ui/separator";
 import { ModelType } from '@/services/api';
 import { useSidebarItemAnimation } from '@/hooks/use-gsap-animations';
 import CustomModelForm from './CustomModelForm';
-import { Separator } from "@/components/ui/separator";
 
-export interface ChatSession {
-  _id: string;
-  title: string;
-  model: ModelType;
-}
-
-interface CustomModel {
-  name: string;
-  id: string;
-  apiEndpoint: string;
-  apiKey: string;
-}
+// Import the new components
+import ModelSelector from './sidebar/ModelSelector';
+import ChatHistoryList, { ChatSession } from './sidebar/ChatHistoryList';
+import NewChatButton from './sidebar/NewChatButton';
+import SidebarFooter from './sidebar/SidebarFooter';
+import { useSidebar, SidebarProvider } from '../contexts/SidebarContext';
 
 interface ChatSidebarProps {
   selectedModel: ModelType;
@@ -36,25 +26,7 @@ interface ChatSidebarProps {
   isLoading: boolean;
 }
 
-const defaultModels = [
-  {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    icon: '🤖'
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    icon: '🔮'
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    icon: '🧠'
-  }
-];
-
-const ChatSidebar: React.FC<ChatSidebarProps> = ({
+const ChatSidebarContent = ({
   selectedModel,
   onSelectModel,
   onNewChat,
@@ -66,41 +38,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSelectChat,
   onDeleteChat,
   isLoading
-}) => {
+}: ChatSidebarProps) => {
   // Use animation hook to animate sidebar items
   useSidebarItemAnimation('.sidebar-item-appear', 0.2);
-  const [customModels, setCustomModels] = React.useState<CustomModel[]>([]);
   const [isAddModelOpen, setIsAddModelOpen] = React.useState(false);
-
-  // Load custom models from localStorage
-  React.useEffect(() => {
-    const savedModels = localStorage.getItem('custom-models');
-    if (savedModels) {
-      try {
-        setCustomModels(JSON.parse(savedModels));
-      } catch (e) {
-        console.error('Failed to load custom models:', e);
-      }
-    }
-  }, []);
-
-  // Save custom models to localStorage
-  const saveCustomModel = (model: CustomModel) => {
-    const updatedModels = [...customModels, model];
-    setCustomModels(updatedModels);
-    localStorage.setItem('custom-models', JSON.stringify(updatedModels));
-  };
-
-  // Combined models
-  const allModels = [
-    ...defaultModels,
-    ...customModels.map(model => ({
-      id: model.id as ModelType,
-      name: model.name,
-      icon: '⚙️'
-    }))
-  ];
-
+  const { customModels, saveCustomModel } = useSidebar();
+  
   return (
     <>
       <div 
@@ -117,85 +60,26 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           lg:translate-x-0 lg:relative lg:z-0
         `}
       >
-        <div className="p-4">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start gap-2 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 sidebar-item-appear"
-            onClick={onNewChat}
-          >
-            <Plus className="w-4 h-4" />
-            New chat
-          </Button>
-        </div>
+        <NewChatButton onClick={onNewChat} />
         
-        <div className="px-2 py-2 sidebar-item-appear">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-semibold">Models</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0"
-              onClick={() => setIsAddModelOpen(true)}
-            >
-              <PlusCircle className="h-4 w-4" />
-              <span className="sr-only">Add custom model</span>
-            </Button>
-          </div>
-          <div className="mt-2 space-y-1">
-            {allModels.map((model) => (
-              <Button
-                key={model.id}
-                variant={selectedModel === model.id ? "secondary" : "ghost"}
-                className="w-full justify-start gap-2 sidebar-item-appear"
-                onClick={() => onSelectModel(model.id)}
-              >
-                <span className="text-lg">{model.icon}</span>
-                {model.name}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <ModelSelector 
+          selectedModel={selectedModel}
+          onSelectModel={onSelectModel}
+          onAddCustomModel={() => setIsAddModelOpen(true)}
+          customModels={customModels}
+        />
         
         <Separator className="my-2" />
         
-        <div className="px-2 py-2 sidebar-item-appear flex-1 overflow-hidden flex flex-col">
-          <h2 className="px-2 text-lg font-semibold">Chat History</h2>
-          <ScrollArea className="flex-1 mt-2 pr-2">
-            <div className="space-y-1">
-              {isLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : chats.length === 0 ? (
-                <p className="text-center text-muted-foreground p-2">No chat history</p>
-              ) : (
-                chats.map((chat, index) => (
-                  <ChatSidebarItem 
-                    key={chat._id}
-                    id={chat._id}
-                    title={chat.title}
-                    model={chat.model}
-                    isActive={currentChatId === chat._id}
-                    onClick={() => onSelectChat(chat._id, chat.model)}
-                    onDelete={() => onDeleteChat(chat._id)}
-                    animationDelay={index * 0.05}
-                  />
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+        <ChatHistoryList 
+          chats={chats}
+          currentChatId={currentChatId}
+          onSelectChat={onSelectChat}
+          onDeleteChat={onDeleteChat}
+          isLoading={isLoading}
+        />
         
-        <div className="mt-auto p-4 border-t border-sidebar-border sidebar-item-appear">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start gap-2"
-            onClick={onOpenSettings}
-          >
-            <Settings className="w-4 h-4" />
-            Settings
-          </Button>
-        </div>
+        <SidebarFooter onOpenSettings={onOpenSettings} />
       </aside>
       
       <CustomModelForm
@@ -204,6 +88,15 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         onSave={saveCustomModel}
       />
     </>
+  );
+};
+
+// Wrapper component to provide the sidebar context
+const ChatSidebar: React.FC<ChatSidebarProps> = (props) => {
+  return (
+    <SidebarProvider>
+      <ChatSidebarContent {...props} />
+    </SidebarProvider>
   );
 };
 

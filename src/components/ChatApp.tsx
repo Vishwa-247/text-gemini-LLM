@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import ChatSidebar from './ChatSidebar';
 import Chat from './Chat';
 import SettingsModal from './SettingsModal';
@@ -30,10 +30,12 @@ const ChatApp = () => {
     anthropic: '',
   });
 
-  // Query for fetching chats
+  // Query for fetching chats with staleTime to prevent unnecessary loading
   const { data: chats = [], isLoading: isLoadingChats, refetch: refetchChats } = useQuery({
     queryKey: ['chats'],
     queryFn: getChats,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   // Mutation for deleting chats
@@ -42,7 +44,6 @@ const ChatApp = () => {
     onSuccess: () => {
       // Invalidate and refetch chats after deletion
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-      refetchChats();
       
       toast({
         title: "Chat deleted",
@@ -107,9 +108,6 @@ const ChatApp = () => {
     if (isMobile) {
       setIsSidebarOpen(false);
     }
-    
-    // Force refresh the chat history
-    queryClient.invalidateQueries({ queryKey: ['chatHistory', chatId] });
   };
 
   const handleDeleteChat = (chatId: string) => {
@@ -117,7 +115,7 @@ const ChatApp = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <ChatSidebar 
         selectedModel={selectedModel}
         onSelectModel={setSelectedModel}
@@ -132,7 +130,7 @@ const ChatApp = () => {
         isLoading={isLoadingChats}
       />
       
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <Chat 
           selectedModel={selectedModel}
           apiKeys={apiKeys}

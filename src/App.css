@@ -53,9 +53,46 @@
   100% { opacity: 0.2; }
 }
 
+/* Sidebar styles */
+.bg-sidebar {
+  background-color: var(--background);
+  border-right: 1px solid var(--border);
+}
+
+/* Ensure sidebar is always visible on large screens */
+@media (min-width: 1024px) {
+  aside.lg\:translate-x-0 {
+    transform: translateX(0) !important;
+    display: flex !important;
+  }
+}
+
 /* Media queries for responsive design */
 @media (max-width: 768px) {
   .chat-input-container {
     padding: 0.75rem;
   }
+}
+
+/* Ensure scrollbar is visible and working */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Prevent content overflow */
+.overflow-x-hidden {
+  overflow-x: hidden;
 }

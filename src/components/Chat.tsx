@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { nanoid } from 'nanoid';
 import ChatMessage, { Message, MessageRole } from './ChatMessage';
@@ -42,7 +43,7 @@ const Chat = ({
   const emptyStateRef = useEmptyStateAnimation();
   const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
-  // Query to get chat history if a chatId is provided, with no loading state
+  // Query to get chat history if a chatId is provided, with optimized settings
   const { data: chatHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
     queryFn: () => {
@@ -50,8 +51,8 @@ const Chat = ({
       return getChatHistory(chatId);
     },
     enabled: !!chatId,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 60000, // 1 minute
+    refetchOnWindowFocus: false,
     refetchOnMount: true,
   });
 
@@ -111,7 +112,7 @@ const Chat = ({
       if (response.conversation_id && (!chatId || chatId !== response.conversation_id)) {
         onChatIdChange(response.conversation_id);
         
-        // Invalidate chats query to refresh the sidebar
+        // Invalidate chats query to refresh the sidebar with new conversation
         queryClient.invalidateQueries({ queryKey: ['chats'] });
       }
       
@@ -124,9 +125,6 @@ const Chat = ({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-      
-      // Also invalidate the chat history to keep it updated
-      queryClient.invalidateQueries({ queryKey: ['chatHistory', response.conversation_id] });
       
     } catch (error: any) {
       console.error('Error sending message:', error);

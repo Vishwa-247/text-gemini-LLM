@@ -1,73 +1,49 @@
 
-# Chat Application with AI Integration
+# AI Chat Application
 
-A modern chat interface application that integrates with multiple AI services (ChatGPT, Gemini, Claude) and provides chat session persistence using MongoDB.
+This application provides a ChatGPT-like interface for communicating with various AI models including ChatGPT, Gemini, and Claude.
 
 ## Features
 
-- Clean, responsive UI with smooth GSAP animations
-- Support for multiple AI chat models
-- Persistent chat history with MongoDB
-- Ability to switch between different conversations
-- Mobile-friendly design
+- **Multi-model Support**: Choose between ChatGPT, Gemini, Claude, or add your own custom models
+- **Chat History**: Automatically saves conversations in the sidebar for easy access
+- **Responsive Design**: Works on mobile and desktop devices
+- **Theme Toggle**: Switch between light and dark mode
+- **Settings Panel**: Configure API keys for different models
+- **Custom Models**: Add your own AI models with custom endpoints
 
-## Setup Instructions
+## Recent Fixes & Improvements
 
-### 1. Backend Setup
+1. **Fixed Sidebar Visibility**: The sidebar now properly displays on all screen sizes and devices
+2. **Enhanced Chat History**: Conversations are now properly saved and displayed in the sidebar
+3. **Removed Unnecessary Loading States**: Optimized loading behavior to prevent excessive loading states
+4. **Refactored Components**: Split large components into smaller, more manageable pieces for better maintainability
+   - Created separate components for ModelSelector, ChatHistoryList, NewChatButton, and SidebarFooter
+   - Added SidebarContext for better state management of custom models
+5. **Improved Styling**: Enhanced the UI with better contrast and spacing
+6. **Optimized Performance**: Reduced unnecessary re-renders and API calls
+7. **Fixed Scrolling Issues**: Chat now properly scrolls to bottom when new messages are added
 
-```bash
-# Navigate to the backend directory
-cd backend
+## How to Use
 
-# Install the required Python packages
-pip install -r requirements.txt
+1. Select an AI model from the sidebar
+2. Type your message in the input box and press Enter or click the Send button
+3. Your conversation will be saved automatically
+4. Access previous conversations from the Chat History section in the sidebar
+5. Add custom models via the + button in the Models section
+6. Configure API keys in the Settings panel
 
-# Make sure MongoDB is running
-# Start the Flask server
-python app.py
-```
+## Technical Implementation
 
-### 2. Frontend Setup
+The application is built with:
+- React for UI components
+- TanStack Query for data fetching and caching
+- Tailwind CSS for styling
+- Shadcn UI for component library
+- GSAP for animations
 
-```bash
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
-
-### Environment Variables
-
-Create a `.env` file in the backend directory with the following variables:
-
-```
-# API Keys
-OPENAI_API_KEY=your_openai_api_key
-GEMINI_API_KEY=your_gemini_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/
-DB_NAME=studymate_db
-
-# Model Names
-OPENAI_MODEL=gpt-4o-mini
-ANTHROPIC_MODEL=claude-3-sonnet-20240229
-GEMINI_MODEL=gemini-1.5-pro
-```
-
-## Usage
-
-1. Select your preferred AI model in the sidebar (ChatGPT, Gemini, or Claude)
-2. Start a new conversation by clicking "New Chat"
-3. Type your message in the input box at the bottom
-4. View your chat history in the sidebar
-5. Click on any previous chat to continue the conversation
-
-## Tech Stack
-
-- **Frontend**: React, TypeScript, TailwindCSS, GSAP animations
-- **Backend**: Flask, Python
-- **Database**: MongoDB
-- **AI Services**: OpenAI (ChatGPT), Google (Gemini), Anthropic (Claude)
+Performance optimizations include:
+- Stale-while-revalidate caching strategy
+- Reduced re-renders with React.memo and useCallback
+- Optimized loading states
+- Component code splitting
