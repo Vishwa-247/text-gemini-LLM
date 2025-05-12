@@ -64,7 +64,15 @@
   aside.lg\:translate-x-0 {
     transform: translateX(0) !important;
     display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
+}
+
+/* Make sure sidebar content is visible */
+.sidebar-content {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Media queries for responsive design */
@@ -95,4 +103,9 @@
 /* Prevent content overflow */
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+
+/* Fix the z-index for sidebar */
+aside {
+  z-index: 50 !important;
 }

@@ -5,7 +5,7 @@ import { ModelType } from '@/services/api';
 import { useSidebarItemAnimation } from '@/hooks/use-gsap-animations';
 import CustomModelForm from './CustomModelForm';
 
-// Import the new components
+// Import the components
 import ModelSelector from './sidebar/ModelSelector';
 import ChatHistoryList, { ChatSession } from './sidebar/ChatHistoryList';
 import NewChatButton from './sidebar/NewChatButton';
@@ -57,29 +57,31 @@ const ChatSidebarContent = ({
           fixed top-0 left-0 z-50 h-full w-[280px] bg-sidebar border-r border-sidebar-border flex flex-col
           transition-transform duration-300 ease-in-out
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:relative lg:z-0
+          lg:translate-x-0 lg:relative lg:z-10 overflow-hidden
         `}
       >
-        <NewChatButton onClick={onNewChat} />
-        
-        <ModelSelector 
-          selectedModel={selectedModel}
-          onSelectModel={onSelectModel}
-          onAddCustomModel={() => setIsAddModelOpen(true)}
-          customModels={customModels}
-        />
-        
-        <Separator className="my-2" />
-        
-        <ChatHistoryList 
-          chats={chats}
-          currentChatId={currentChatId}
-          onSelectChat={onSelectChat}
-          onDeleteChat={onDeleteChat}
-          isLoading={isLoading}
-        />
-        
-        <SidebarFooter onOpenSettings={onOpenSettings} />
+        <div className="flex flex-col h-full w-full overflow-y-auto sidebar-content">
+          <NewChatButton onClick={onNewChat} />
+          
+          <ModelSelector 
+            selectedModel={selectedModel}
+            onSelectModel={onSelectModel}
+            onAddCustomModel={() => setIsAddModelOpen(true)}
+            customModels={customModels}
+          />
+          
+          <Separator className="my-2" />
+          
+          <ChatHistoryList 
+            chats={chats}
+            currentChatId={currentChatId}
+            onSelectChat={onSelectChat}
+            onDeleteChat={onDeleteChat}
+            isLoading={isLoading}
+          />
+          
+          <SidebarFooter onOpenSettings={onOpenSettings} />
+        </div>
       </aside>
       
       <CustomModelForm

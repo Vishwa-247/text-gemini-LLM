@@ -14,7 +14,7 @@ This application provides a ChatGPT-like interface for communicating with variou
 
 ## Recent Fixes & Improvements
 
-1. **Fixed Sidebar Visibility**: The sidebar now properly displays on all screen sizes and devices
+1. **Fixed Sidebar Visibility**: The sidebar now properly displays on all screen sizes and devices with improved styling and layout
 2. **Enhanced Chat History**: Conversations are now properly saved and displayed in the sidebar
 3. **Removed Unnecessary Loading States**: Optimized loading behavior to prevent excessive loading states
 4. **Refactored Components**: Split large components into smaller, more manageable pieces for better maintainability
@@ -23,6 +23,7 @@ This application provides a ChatGPT-like interface for communicating with variou
 5. **Improved Styling**: Enhanced the UI with better contrast and spacing
 6. **Optimized Performance**: Reduced unnecessary re-renders and API calls
 7. **Fixed Scrolling Issues**: Chat now properly scrolls to bottom when new messages are added
+8. **Fixed Z-index Issues**: Corrected z-index values to ensure proper layering of UI elements
 
 ## How to Use
 

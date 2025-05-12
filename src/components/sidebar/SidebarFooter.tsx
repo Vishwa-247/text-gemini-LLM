@@ -12,7 +12,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ onOpenSettings }) => {
     <div className="mt-auto p-4 border-t border-sidebar-border sidebar-item-appear">
       <Button 
         variant="ghost" 
-        className="w-full justify-start gap-2"
+        className="w-full justify-start gap-2 opacity-100"
         onClick={onOpenSettings}
       >
         <Settings className="w-4 h-4" />
