@@ -25,18 +25,18 @@ const ChatApp = () => {
 
   // State for API keys - in a real app, these would be stored securely
   const [apiKeys, setApiKeys] = useState({
-    openai: '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',
-    gemini: 'AIzaSyCr5e_YREkbM8OXc5XL550wJf8ArohFT_Q',
-    anthropic: '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',
-    grok: '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'
+    openai: process.env.OPENAI_API_KEY || '',
+    gemini: process.env.GEMINI_API_KEY || '',
+    anthropic: process.env.ANTHROPIC_API_KEY || '',
+    grok: process.env.GROK_API_KEY || ''
   });
 
   // Query for fetching chats with staleTime to prevent unnecessary loading
   const { data: chats = [], isLoading: isLoadingChats, refetch: refetchChats } = useQuery({
     queryKey: ['chats'],
     queryFn: getChats,
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    staleTime: 5000, // 5 seconds - reduced to help with testing
+    refetchOnWindowFocus: true, 
   });
 
   // Mutation for deleting chats
@@ -65,24 +65,8 @@ const ChatApp = () => {
     },
   });
 
-  // Load API keys from localStorage on mount
-  useEffect(() => {
-    const savedKeys = localStorage.getItem('ai-api-keys');
-    if (savedKeys) {
-      try {
-        setApiKeys(JSON.parse(savedKeys));
-      } catch (e) {
-        console.error('Failed to parse saved API keys:', e);
-      }
-    } else {
-      // Store default API keys if none are saved
-      localStorage.setItem('ai-api-keys', JSON.stringify(apiKeys));
-    }
-  }, []);
-
   const handleSaveApiKeys = (keys: typeof apiKeys) => {
     setApiKeys(keys);
-    localStorage.setItem('ai-api-keys', JSON.stringify(keys));
     toast({
       title: "Settings saved",
       description: "Your API keys have been saved.",
@@ -109,8 +93,12 @@ const ChatApp = () => {
   };
 
   const handleSelectChat = (chatId: string, model: ModelType) => {
+    console.log("Selecting chat:", chatId, "with model:", model);
     setCurrentChatId(chatId);
     setSelectedModel(model);
+    
+    // Invalidate chat history to force refresh
+    queryClient.invalidateQueries({ queryKey: ['chatHistory', chatId] });
     
     // Close sidebar on mobile after selecting a chat
     if (isMobile) {

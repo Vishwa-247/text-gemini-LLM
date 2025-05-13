@@ -3,14 +3,12 @@ import * as React from 'react';
 import { Separator } from "@/components/ui/separator";
 import { ModelType } from '@/services/api';
 import { useSidebarItemAnimation } from '@/hooks/use-gsap-animations';
-import CustomModelForm from './CustomModelForm';
 
-// Import the components
+// Import components
 import ModelSelector from './sidebar/ModelSelector';
 import ChatHistoryList, { ChatSession } from './sidebar/ChatHistoryList';
 import NewChatButton from './sidebar/NewChatButton';
 import SidebarFooter from './sidebar/SidebarFooter';
-import { useSidebar, SidebarProvider } from '../contexts/SidebarContext';
 
 interface ChatSidebarProps {
   selectedModel: ModelType;
@@ -26,7 +24,7 @@ interface ChatSidebarProps {
   isLoading: boolean;
 }
 
-const ChatSidebarContent = ({
+const ChatSidebar: React.FC<ChatSidebarProps> = ({
   selectedModel,
   onSelectModel,
   onNewChat,
@@ -38,11 +36,9 @@ const ChatSidebarContent = ({
   onSelectChat,
   onDeleteChat,
   isLoading
-}: ChatSidebarProps) => {
+}) => {
   // Use animation hook to animate sidebar items
   useSidebarItemAnimation('.sidebar-item-appear', 0.2);
-  const [isAddModelOpen, setIsAddModelOpen] = React.useState(false);
-  const { customModels, saveCustomModel } = useSidebar();
   
   return (
     <>
@@ -60,15 +56,13 @@ const ChatSidebarContent = ({
           lg:translate-x-0 lg:relative lg:z-10
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           <NewChatButton onClick={onNewChat} />
           
           <ModelSelector 
             selectedModel={selectedModel}
             onSelectModel={onSelectModel}
-            onAddCustomModel={() => setIsAddModelOpen(true)}
             onNewChat={onNewChat}
-            customModels={customModels}
           />
           
           <Separator className="my-2" />
@@ -84,22 +78,7 @@ const ChatSidebarContent = ({
           <SidebarFooter onOpenSettings={onOpenSettings} />
         </div>
       </aside>
-      
-      <CustomModelForm
-        open={isAddModelOpen}
-        onOpenChange={setIsAddModelOpen}
-        onSave={saveCustomModel}
-      />
     </>
-  );
-};
-
-// Wrapper component to provide the sidebar context
-const ChatSidebar: React.FC<ChatSidebarProps> = (props) => {
-  return (
-    <SidebarProvider>
-      <ChatSidebarContent {...props} />
-    </SidebarProvider>
   );
 };
 

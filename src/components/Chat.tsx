@@ -17,6 +17,7 @@ interface ChatProps {
     openai: string;
     gemini: string;
     anthropic: string;
+    grok: string;
   };
   chatId?: string;
   onChatIdChange: (chatId: string) => void;
@@ -27,6 +28,7 @@ const modelNames: Record<string, string> = {
   'chatgpt': 'ChatGPT',
   'gemini': 'Gemini',
   'claude': 'Claude',
+  'grok': 'Grok',
 };
 
 const Chat = ({ 
@@ -43,13 +45,15 @@ const Chat = ({
   const emptyStateRef = useEmptyStateAnimation();
   const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
-  // Query to get chat history if a chatId is provided, with optimized settings
-  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
+  // Query to get chat history if a chatId is provided
+  const { data: chatHistory, isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
     queryFn: async () => {
       if (!chatId) return Promise.resolve([]);
       try {
+        console.log("Fetching chat history for:", chatId);
         const history = await getChatHistory(chatId);
+        console.log("Got history:", history);
         return history;
       } catch (error) {
         console.error("Failed to fetch chat history:", error);
@@ -62,24 +66,30 @@ const Chat = ({
       }
     },
     enabled: !!chatId,
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: false,
+    staleTime: 5000, // 5 seconds - reduced to help with testing
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
 
   // Convert chat history to messages format
   React.useEffect(() => {
+    console.log("Chat history state changed:", chatHistory);
     if (chatHistory && chatHistory.length > 0) {
-      const formattedMessages = chatHistory.map(msg => ({
-        id: nanoid(),
-        role: msg.role as MessageRole,
-        content: msg.content,
-        timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-      }));
+      console.log("Processing chat history:", chatHistory.length, "messages");
+      const formattedMessages = chatHistory
+        .filter(msg => msg.role !== 'system') // Exclude system messages
+        .map(msg => ({
+          id: nanoid(),
+          role: msg.role as MessageRole,
+          content: msg.content,
+          timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+        }));
+      console.log("Formatted messages:", formattedMessages.length);
       setMessages(formattedMessages);
       setTimeout(() => scrollToBottom(), 100);
     } else if (!chatId) {
       // Clear messages when starting a new chat
+      console.log("No chat ID, clearing messages");
       setMessages([]);
     }
   }, [chatHistory, chatId, scrollToBottom]);
@@ -113,6 +123,12 @@ const Chat = ({
     scrollToBottom();
 
     try {
+      console.log("Sending message to backend:", {
+        model: selectedModel,
+        message: content,
+        conversation_id: chatId
+      });
+      
       // Send message to backend
       const response = await sendChatMessage({
         model: selectedModel,
@@ -120,8 +136,11 @@ const Chat = ({
         conversation_id: chatId
       });
       
+      console.log("Got response:", response);
+      
       // Update chatId if this is a new conversation
       if (response.conversation_id && (!chatId || chatId !== response.conversation_id)) {
+        console.log("Setting new chat ID:", response.conversation_id);
         onChatIdChange(response.conversation_id);
         
         // Invalidate chats query to refresh the sidebar with new conversation
@@ -189,7 +208,7 @@ const Chat = ({
             </p>
           </div>
         ) : (
-          <div className="pb-36">
+          <div className="pb-24">
             {messages.map((message) => (
               <ChatMessage 
                 key={message.id} 
@@ -220,8 +239,8 @@ const Chat = ({
         )}
       </div>
 
-      <div className="w-full border-t border-border bg-background">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="w-full border-t border-border bg-background fixed bottom-0 left-0 right-0">
+        <div className="max-w-3xl mx-auto px-4 py-2">
           <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
         </div>
       </div>

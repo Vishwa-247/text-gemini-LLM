@@ -9,10 +9,10 @@ interface SidebarFooterProps {
 
 const SidebarFooter: React.FC<SidebarFooterProps> = ({ onOpenSettings }) => {
   return (
-    <div className="mt-auto p-4 border-t border-sidebar-border bg-sidebar">
+    <div className="mt-auto p-3 border-t border-sidebar-border bg-sidebar">
       <Button 
         variant="ghost" 
-        className="w-full justify-start gap-2 mb-2"
+        className="w-full justify-start gap-2 mb-1"
         onClick={onOpenSettings}
       >
         <Settings className="w-4 h-4" />
@@ -23,7 +23,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ onOpenSettings }) => {
           <Info className="w-3 h-3" />
           <span>Connected to MongoDB</span>
         </div>
-        <div className="mt-1">
+        <div className="mt-1 text-xs">
           All chats are saved automatically
         </div>
       </div>

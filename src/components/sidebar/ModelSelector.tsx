@@ -1,23 +1,16 @@
 
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { ModelType } from '@/services/api';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ModelSelectorProps {
   selectedModel: ModelType;
   onSelectModel: (model: ModelType) => void;
-  onAddCustomModel: () => void;
-  onNewChat: () => void; // Added this prop
-  customModels: Array<{
-    id: string;
-    name: string;
-    apiEndpoint?: string;
-    apiKey?: string;
-  }>;
+  onNewChat: () => void;
 }
 
-const defaultModels = [
+const models = [
   {
     id: 'chatgpt' as ModelType,
     name: 'ChatGPT',
@@ -43,20 +36,8 @@ const defaultModels = [
 const ModelSelector: React.FC<ModelSelectorProps> = ({
   selectedModel,
   onSelectModel,
-  onAddCustomModel,
-  onNewChat,
-  customModels
+  onNewChat
 }) => {
-  // Combined models
-  const allModels = [
-    ...defaultModels,
-    ...customModels.map(model => ({
-      id: model.id as ModelType,
-      name: model.name,
-      icon: '⚙️'
-    }))
-  ];
-
   // Handle model selection and start a new chat
   const handleModelSelect = (modelId: ModelType) => {
     onSelectModel(modelId);
@@ -65,31 +46,22 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   return (
     <div className="px-2 py-2">
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-lg font-semibold">Models</h2>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0"
-          onClick={onAddCustomModel}
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span className="sr-only">Add custom model</span>
-        </Button>
-      </div>
-      <div className="mt-2 space-y-1">
-        {allModels.map((model) => (
-          <Button
-            key={model.id}
-            variant={selectedModel === model.id ? "secondary" : "ghost"}
-            className="w-full justify-start gap-2"
-            onClick={() => handleModelSelect(model.id)}
-          >
-            <span className="text-lg">{model.icon}</span>
-            {model.name}
-          </Button>
-        ))}
-      </div>
+      <h2 className="text-lg font-semibold mb-2 px-2">Models</h2>
+      <ScrollArea className="h-[180px]">
+        <div className="space-y-1 pr-2">
+          {models.map((model) => (
+            <Button
+              key={model.id}
+              variant={selectedModel === model.id ? "secondary" : "ghost"}
+              className="w-full justify-start gap-2"
+              onClick={() => handleModelSelect(model.id)}
+            >
+              <span className="text-lg">{model.icon}</span>
+              {model.name}
+            </Button>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

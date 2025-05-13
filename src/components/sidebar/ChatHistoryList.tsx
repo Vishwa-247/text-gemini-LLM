@@ -26,10 +26,10 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = ({
   isLoading
 }) => {
   return (
-    <div className="px-2 py-2 flex-1 overflow-hidden flex flex-col">
-      <h2 className="px-2 text-lg font-semibold">Chat History</h2>
-      <ScrollArea className="flex-1 mt-2 pr-2">
-        <div className="space-y-1">
+    <div className="px-2 py-2 flex-1 overflow-hidden">
+      <h2 className="px-2 text-lg font-semibold mb-2">Chat History</h2>
+      <ScrollArea className="h-[calc(100%-40px)]">
+        <div className="space-y-1 pr-2">
           {isLoading ? (
             <div className="flex items-center justify-center p-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

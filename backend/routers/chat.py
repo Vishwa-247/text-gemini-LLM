@@ -1,3 +1,4 @@
+
 from flask import Blueprint, request, jsonify
 from services.openai_service import ask_openai
 from services.gemini_service import ask_gemini
@@ -34,17 +35,20 @@ def chat():
     model = data.get('model', 'chatgpt')
     message = data.get('message', '')
     conversation_id = data.get('conversation_id')
-    custom_model_data = data.get('custom_model', None)
+    
+    print(f"Received chat request: model={model}, conversation_id={conversation_id}")
     
     try:
         # Create a new conversation if it doesn't exist
         if not conversation_id:
+            print("Creating new conversation")
             conversation_id = mongo_db.create_chat(model=model, title=message[:30])
             # Initialize with system message in cache
             conversations_cache[conversation_id] = [system_message]
             # Save system message to MongoDB
             mongo_db.save_message(conversation_id, "system", system_message["content"])
         elif conversation_id not in conversations_cache:
+            print(f"Loading existing conversation {conversation_id}")
             # Load conversation history from DB to cache
             messages_db = mongo_db.get_chat_history(conversation_id)
             
@@ -65,6 +69,7 @@ def chat():
                 conversations_cache[conversation_id].insert(0, system_message)
                 mongo_db.save_message(conversation_id, "system", system_message["content"])
         
+        print(f"Adding user message to conversation cache")
         # Add user message to conversation cache
         conversations_cache[conversation_id].append({
             "role": "user",
@@ -75,6 +80,7 @@ def chat():
         mongo_db.save_message(conversation_id, "user", message)
         
         # Get response based on selected model
+        print(f"Getting response from {model}")
         if model == 'chatgpt':
             response_text = ask_openai(conversations_cache[conversation_id])
         elif model == 'gemini':
@@ -83,12 +89,8 @@ def chat():
             response_text = ask_claude(conversations_cache[conversation_id])
         elif model == 'grok':
             response_text = ask_grok(conversations_cache[conversation_id])
-        elif custom_model_data:
-            # This is a placeholder for custom model integration
-            # In a real implementation, you would use the custom_model_data to make API calls
-            response_text = f"Response from custom model: {model}. Custom model integration is in development."
         else:
-            return jsonify({"error": "Unsupported model"}), 400
+            return jsonify({"error": f"Unsupported model: {model}"}), 400
         
         # Add assistant response to conversation cache
         conversations_cache[conversation_id].append({
@@ -99,13 +101,14 @@ def chat():
         # Save assistant response to MongoDB
         mongo_db.save_message(conversation_id, "assistant", response_text)
         
+        print(f"Returning response for conversation {conversation_id}")
         return jsonify({
             "response": response_text,
             "conversation_id": conversation_id
         })
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error in chat endpoint: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @chat_router.route('/chats', methods=['GET'])
@@ -113,10 +116,11 @@ def get_chats():
     try:
         # Get all chats for anonymous user (you can add user authentication later)
         chats = mongo_db.get_all_chats()
+        print(f"Retrieved {len(chats)} chats")
         return jsonify({"chats": chats})
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error getting chats: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @chat_router.route('/chats/<chat_id>', methods=['GET'])
@@ -124,11 +128,13 @@ def get_chat_history(chat_id):
     try:
         # Get conversation history
         limit = request.args.get('limit', 100, type=int)
+        print(f"Getting chat history for {chat_id}, limit={limit}")
         messages = mongo_db.get_chat_history(chat_id, limit)
+        print(f"Retrieved {len(messages)} messages")
         return jsonify({"messages": messages})
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error getting chat history: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @chat_router.route('/chats/<chat_id>', methods=['DELETE'])
@@ -152,24 +158,5 @@ def delete_chat(chat_id):
             }), 500
         
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-# Route to save custom model configurations
-@chat_router.route('/models/custom', methods=['POST'])
-def save_custom_model():
-    try:
-        data = request.json
-        model_id = data.get('id')
-        model_name = data.get('name')
-        model_endpoint = data.get('apiEndpoint')
-        
-        # In a real implementation, you would store this in the database
-        # For now, just return success
-        return jsonify({
-            "success": True,
-            "message": f"Custom model {model_name} saved successfully"
-        })
-    except Exception as e:
-        print(f"Error saving custom model: {str(e)}")
+        print(f"Error deleting chat: {str(e)}")
         return jsonify({"error": str(e)}), 500
