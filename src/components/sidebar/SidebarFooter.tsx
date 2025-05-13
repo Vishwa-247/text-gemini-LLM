@@ -9,7 +9,7 @@ interface SidebarFooterProps {
 
 const SidebarFooter: React.FC<SidebarFooterProps> = ({ onOpenSettings }) => {
   return (
-    <div className="mt-auto p-3 border-t border-sidebar-border bg-sidebar">
+    <div className="mt-auto p-2 border-t border-sidebar-border bg-sidebar">
       <Button 
         variant="ghost" 
         className="w-full justify-start gap-2 mb-1"

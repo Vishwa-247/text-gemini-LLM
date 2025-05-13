@@ -48,7 +48,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     // Auto-resize textarea
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      const newHeight = Math.min(textareaRef.current.scrollHeight, 150); // Lower max height
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 100); // Reduced max height
       textareaRef.current.style.height = `${newHeight}px`;
     }
   };
@@ -56,7 +56,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-3xl mx-auto"
+      className="w-full max-w-2xl mx-auto" // Decreased width from max-w-3xl to max-w-2xl
     >
       <div className="relative bg-background rounded-md border border-input">
         <Textarea
@@ -65,7 +65,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
           placeholder="Message..."
-          className="resize-none pr-12 min-h-[50px] max-h-[150px] bg-transparent rounded-md w-full overflow-y-auto border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="resize-none pr-12 min-h-[40px] max-h-[100px] bg-transparent rounded-md w-full overflow-y-auto border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
         />
         <Button
@@ -73,7 +73,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           type="submit"
           size="icon"
           disabled={!message.trim() || disabled}
-          className="absolute right-2 bottom-2"
+          className="absolute right-2 bottom-1"
         >
           <Send className="h-4 w-4" />
           <span className="sr-only">Send message</span>

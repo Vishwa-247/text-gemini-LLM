@@ -24,11 +24,12 @@ const ChatApp = () => {
   const queryClient = useQueryClient();
 
   // State for API keys - in a real app, these would be stored securely
+  // Using import.meta.env instead of process.env for Vite
   const [apiKeys, setApiKeys] = useState({
-    openai: process.env.OPENAI_API_KEY || '',
-    gemini: process.env.GEMINI_API_KEY || '',
-    anthropic: process.env.ANTHROPIC_API_KEY || '',
-    grok: process.env.GROK_API_KEY || ''
+    openai: import.meta.env.VITE_OPENAI_API_KEY || '',
+    gemini: import.meta.env.VITE_GEMINI_API_KEY || '',
+    anthropic: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
+    grok: import.meta.env.VITE_GROK_API_KEY || ''
   });
 
   // Query for fetching chats with staleTime to prevent unnecessary loading
