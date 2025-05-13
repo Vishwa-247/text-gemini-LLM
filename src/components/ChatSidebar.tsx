@@ -75,7 +75,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             isLoading={isLoading}
           />
           
-          <SidebarFooter onOpenSettings={onOpenSettings} />
+          <SidebarFooter />
         </div>
       </aside>
     </>

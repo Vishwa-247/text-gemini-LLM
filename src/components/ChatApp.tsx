@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import ChatSidebar from './ChatSidebar';
 import Chat from './Chat';
+import ChatHeader from './ChatHeader';
 import SettingsModal from './SettingsModal';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getChats, deleteChat, ModelType } from '@/services/api';
@@ -23,8 +24,7 @@ const ChatApp = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // State for API keys - in a real app, these would be stored securely
-  // Using import.meta.env instead of process.env for Vite
+  // State for API keys - using import.meta.env for Vite
   const [apiKeys, setApiKeys] = useState({
     openai: import.meta.env.VITE_OPENAI_API_KEY || '',
     gemini: import.meta.env.VITE_GEMINI_API_KEY || '',
@@ -112,29 +112,33 @@ const ChatApp = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <ChatSidebar 
-        selectedModel={selectedModel}
-        onSelectModel={handleSelectModel}
-        onNewChat={handleNewChat}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        isMobileSidebarOpen={isSidebarOpen}
-        onCloseMobileSidebar={() => setIsSidebarOpen(false)}
-        chats={chats}
-        currentChatId={currentChatId}
-        onSelectChat={handleSelectChat}
-        onDeleteChat={handleDeleteChat}
-        isLoading={isLoadingChats}
-      />
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <ChatHeader onOpenSettings={() => setIsSettingsOpen(true)} />
       
-      <div className="flex-1 overflow-hidden">
-        <Chat 
+      <div className="flex flex-1 overflow-hidden">
+        <ChatSidebar 
           selectedModel={selectedModel}
-          apiKeys={apiKeys}
-          chatId={currentChatId}
-          onChatIdChange={setCurrentChatId}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          onSelectModel={handleSelectModel}
+          onNewChat={handleNewChat}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          isMobileSidebarOpen={isSidebarOpen}
+          onCloseMobileSidebar={() => setIsSidebarOpen(false)}
+          chats={chats}
+          currentChatId={currentChatId}
+          onSelectChat={handleSelectChat}
+          onDeleteChat={handleDeleteChat}
+          isLoading={isLoadingChats}
         />
+        
+        <div className="flex-1 overflow-hidden">
+          <Chat 
+            selectedModel={selectedModel}
+            apiKeys={apiKeys}
+            chatId={currentChatId}
+            onChatIdChange={setCurrentChatId}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        </div>
       </div>
       
       <SettingsModal 

@@ -26,16 +26,19 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = ({
   isLoading
 }) => {
   return (
-    <div className="px-2 py-2 flex-1 overflow-hidden">
+    <div className="flex-1 px-2 py-2 overflow-hidden flex flex-col">
       <h2 className="px-2 text-lg font-semibold mb-2">Chat History</h2>
-      <ScrollArea className="h-[calc(100%-40px)] pr-2">
-        <div className="space-y-1">
+      <ScrollArea className="flex-1 pr-2">
+        <div className="space-y-1 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center p-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : chats.length === 0 ? (
-            <p className="text-center text-muted-foreground p-2">No chat history</p>
+            <div className="text-center text-muted-foreground p-4 bg-sidebar-accent/10 rounded-md">
+              <p className="mb-1">No chat history</p>
+              <p className="text-xs">Start a new chat to begin</p>
+            </div>
           ) : (
             chats.map((chat, index) => (
               <ChatSidebarItem 
