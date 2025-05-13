@@ -47,7 +47,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   return (
     <div className="px-2 py-2">
       <h2 className="text-lg font-semibold mb-2 px-2">Models</h2>
-      <ScrollArea className="h-[160px]">
+      <ScrollArea className="h-[140px]">
         <div className="space-y-1 pr-2">
           {models.map((model) => (
             <Button

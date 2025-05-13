@@ -14,7 +14,6 @@ interface ChatSidebarProps {
   selectedModel: ModelType;
   onSelectModel: (model: ModelType) => void;
   onNewChat: () => void;
-  onOpenSettings: () => void;
   isMobileSidebarOpen: boolean;
   onCloseMobileSidebar: () => void;
   chats: ChatSession[];
@@ -28,7 +27,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   selectedModel,
   onSelectModel,
   onNewChat,
-  onOpenSettings,
   isMobileSidebarOpen,
   onCloseMobileSidebar,
   chats,

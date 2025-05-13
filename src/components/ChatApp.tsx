@@ -1,14 +1,16 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import ChatSidebar from './ChatSidebar';
 import Chat from './Chat';
 import ChatHeader from './ChatHeader';
 import SettingsModal from './SettingsModal';
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getChats, deleteChat, ModelType } from '@/services/api';
+import { ModelType } from '@/services/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getChats, deleteChat } from '@/services/api';
 
+// Define ChatSession interface for type safety
 interface ChatSession {
   _id: string;
   title: string;
@@ -32,11 +34,14 @@ const ChatApp = () => {
     grok: import.meta.env.VITE_GROK_API_KEY || ''
   });
 
-  // Query for fetching chats with staleTime to prevent unnecessary loading
-  const { data: chats = [], isLoading: isLoadingChats, refetch: refetchChats } = useQuery({
+  // Query for fetching chats
+  const { 
+    data: chats = [], 
+    isLoading: isLoadingChats 
+  } = useQuery({
     queryKey: ['chats'],
     queryFn: getChats,
-    staleTime: 5000, // 5 seconds - reduced to help with testing
+    staleTime: 5000,
     refetchOnWindowFocus: true, 
   });
 
@@ -120,7 +125,6 @@ const ChatApp = () => {
           selectedModel={selectedModel}
           onSelectModel={handleSelectModel}
           onNewChat={handleNewChat}
-          onOpenSettings={() => setIsSettingsOpen(true)}
           isMobileSidebarOpen={isSidebarOpen}
           onCloseMobileSidebar={() => setIsSidebarOpen(false)}
           chats={chats}

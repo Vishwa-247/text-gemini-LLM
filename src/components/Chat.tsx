@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Menu } from "lucide-react";
 import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
-import ThemeSelector from './ThemeSelector';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEmptyStateAnimation, useScrollToBottom } from '@/hooks/use-gsap-animations';
 
@@ -46,7 +45,7 @@ const Chat = ({
   const { containerRef, scrollToBottom } = useScrollToBottom([messages]);
   
   // Query to get chat history if a chatId is provided
-  const { data: chatHistory, isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery({
+  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
     queryKey: ['chatHistory', chatId],
     queryFn: async () => {
       if (!chatId) return Promise.resolve([]);
@@ -66,7 +65,7 @@ const Chat = ({
       }
     },
     enabled: !!chatId,
-    staleTime: 5000, // 5 seconds - reduced to help with testing
+    staleTime: 5000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
@@ -186,8 +185,8 @@ const Chat = ({
             {getCurrentModelName()}
           </span>
         </h1>
-        <div className="flex items-center space-x-2">
-          <ThemeSelector />
+        <div className="w-8 h-8">
+          {/* Placeholder for alignment */}
         </div>
       </header>
 
@@ -217,7 +216,7 @@ const Chat = ({
               />
             ))}
             {isLoading && (
-              <div className="py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4">
+              <div className="py-4 px-4 md:px-6 lg:px-8 flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">
                   <div className="h-8 w-8 rounded-full border flex items-center justify-center bg-primary">
                     <div className="loading-dots">
@@ -239,7 +238,7 @@ const Chat = ({
         )}
       </div>
 
-      <div className="w-full border-t border-border bg-background fixed bottom-0 left-0 right-0">
+      <div className="w-full border-t border-border bg-background fixed bottom-0 left-0 right-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-2">
           <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
         </div>

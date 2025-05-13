@@ -4,6 +4,11 @@ from flask_cors import CORS
 import os
 from bson import ObjectId
 import json
+from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Import LLM clients
 from llm_clients.openai_client import ask_openai
@@ -52,7 +57,7 @@ def chat():
     try:
         # Create a new conversation if it doesn't exist
         if not conversation_id:
-            conversation_id = mongo_db.create_chat(model=model, title=message[:30])
+            conversation_id = str(mongo_db.create_chat(model=model, title=message[:30]))
             # Initialize with system message in cache
             conversations_cache[conversation_id] = [system_message]
         elif conversation_id not in conversations_cache:
@@ -83,6 +88,9 @@ def chat():
             response_text = ask_gemini(conversations_cache[conversation_id])
         elif model == 'claude':
             response_text = ask_claude(conversations_cache[conversation_id])
+        elif model == 'grok':
+            # Add grok implementation here when available
+            response_text = "Grok support is coming soon. Please use another model for now."
         else:
             return jsonify({"error": "Unsupported model"}), 400
         
@@ -107,15 +115,13 @@ def chat():
 @app.route('/api/chats', methods=['GET'])
 def get_chats():
     try:
-        # Get all chats for anonymous user (you can add user authentication later)
+        # Get all chats for anonymous user
         chats = mongo_db.get_all_chats()
         
         # Convert ObjectId to string
         chats_json = json.loads(JSONEncoder().encode(chats))
         
-        return jsonify({
-            "chats": chats_json
-        })
+        return jsonify(chats_json)
         
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -131,9 +137,7 @@ def get_chat_history(chat_id):
         # Convert ObjectId to string
         messages_json = json.loads(JSONEncoder().encode(messages))
         
-        return jsonify({
-            "messages": messages_json
-        })
+        return jsonify(messages_json)
         
     except Exception as e:
         print(f"Error: {str(e)}")

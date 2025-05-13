@@ -57,7 +57,7 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
     <div 
       ref={messageRef}
       className={cn(
-        "py-6 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear",
+        "py-4 px-4 md:px-6 lg:px-8 flex items-start gap-4 message-appear",
         isUser ? "bg-chat-user" : "bg-chat-assistant"
       )}
       style={{ 
@@ -77,13 +77,13 @@ const ChatMessage = ({ message, modelName }: ChatMessageProps) => {
       </div>
       
       <div className="flex-1 prose prose-slate dark:prose-invert max-w-none overflow-hidden">
-        <div className={cn("message", isUser ? "user-message" : "assistant-message")}>
-          {isUser ? (
-            <p className="whitespace-pre-wrap break-words">{message.content}</p>
-          ) : (
-            <ReactMarkdown className="whitespace-pre-wrap break-words">{message.content}</ReactMarkdown>
-          )}
-        </div>
+        {isUser ? (
+          <p className="whitespace-pre-wrap break-words text-foreground">{message.content}</p>
+        ) : (
+          <ReactMarkdown className="whitespace-pre-wrap break-words text-foreground">
+            {message.content}
+          </ReactMarkdown>
+        )}
       </div>
     </div>
   );

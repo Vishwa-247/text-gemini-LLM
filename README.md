@@ -13,17 +13,34 @@ This application provides a ChatGPT-like interface for communicating with variou
 - **Theme Toggle**: Switch between light and dark mode
 - **Settings Panel**: Configure API keys for different models
 - **Custom Models**: Add your own AI models with custom endpoints
+- **Improved Text Visibility**: Enhanced contrast and spacing for better readability
+
+## Security
+
+API keys are stored in `.env` files which should be added to `.gitignore`. The keys in the repository are for demonstration purposes only. In production, you should:
+
+1. Add both `.env` and `backend/.env` to your `.gitignore` file
+2. Never commit real API keys to your repository
+3. Use environment variables in production environments
 
 ## Running the Application
 
 ### Frontend (React)
 
-1. Install dependencies:
+1. Create a `.env` file in the root directory with your API keys:
+   ```
+   VITE_OPENAI_API_KEY=your_openai_key
+   VITE_GEMINI_API_KEY=your_gemini_key
+   VITE_ANTHROPIC_API_KEY=your_claude_key
+   VITE_GROK_API_KEY=your_grok_key
+   ```
+
+2. Install dependencies:
    ```
    npm install
    ```
    
-2. Start the development server:
+3. Start the development server:
    ```
    npm run dev
    ```
@@ -35,18 +52,28 @@ This application provides a ChatGPT-like interface for communicating with variou
    cd backend
    ```
 
-2. Create and activate a virtual environment (optional but recommended):
+2. Create a `.env` file with your API keys:
+   ```
+   OPENAI_API_KEY=your_openai_key
+   GEMINI_API_KEY=your_gemini_key
+   ANTHROPIC_API_KEY=your_claude_key
+   GROK_API_KEY=your_grok_key
+   MONGO_URI=mongodb://localhost:27017/
+   DB_NAME=studymate_db
+   ```
+
+3. Create and activate a virtual environment:
    ```
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. Install Python dependencies:
+4. Install Python dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-4. Start the Flask server:
+5. Start the Flask server:
    ```
    python app.py
    ```
@@ -62,40 +89,23 @@ This application provides a ChatGPT-like interface for communicating with variou
 
 3. The application will automatically create the necessary database and collections.
 
-## Recent Fixes & Improvements
+## Recent Improvements
 
-1. **Added Grok API Support**: Integrated Grok as a new AI model option
-2. **Automatic Chat Creation**: Selecting a model in the sidebar now automatically creates a new chat
-3. **Updated API Keys**: Pre-configured API keys for all supported models
-4. **Fixed Sidebar Visibility**: Completely fixed sidebar content display issues
-5. **Enhanced Chat History Persistence**: All conversations are now properly saved to MongoDB
-6. **Context Preservation**: Chat history maintains full conversation context across sessions
-7. **Improved Loading States**: Added better loading indicators while fetching chat history
-8. **Optimized MongoDB Integration**: Properly handling ObjectId conversion and data serialization
-9. **Refactored Components**: Split large components into smaller, more maintainable pieces
+1. **Enhanced Text Visibility**: Improved contrast and spacing for better text readability
+2. **Fixed Chat Display**: Messages now render properly with correct styling
+3. **UI Cleanup**: Removed redundant theme selector and simplified settings access
+4. **API Key Security**: Moved all API keys to .env files for better security
+5. **Fixed New Chat Functionality**: Selecting a new model now properly starts a new chat
+6. **Code Refactoring**: Split components into smaller, more maintainable files
+7. **Simplified Footer**: Removed unnecessary text in the sidebar footer
+8. **Improved Loading States**: Enhanced the appearance of loading indicators
+9. **Better Chat History Filtering**: System messages no longer appear in the chat UI
+10. **Enhanced Scrolling**: Automatic scrolling to latest messages now works reliably
 
-## How to Use
+## How to Contribute
 
-1. Select an AI model from the sidebar (this will start a new chat)
-2. Type your message in the input box and press Enter or click the Send button
-3. Your conversation will be saved automatically to MongoDB
-4. Access previous conversations from the Chat History section in the sidebar
-5. Add custom models via the + button in the Models section
-6. Configure API keys in the Settings panel
-
-## Technical Implementation
-
-The application is built with:
-- React for UI components
-- TanStack Query for data fetching and caching
-- MongoDB for storing chat history
-- Flask backend with AI model integrations
-- Tailwind CSS for styling
-- Shadcn UI for component library
-- GSAP for animations
-
-Performance optimizations include:
-- Stale-while-revalidate caching strategy
-- Reduced re-renders with React.memo and useCallback
-- Optimized loading states
-- Component code splitting
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -am 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Submit a pull request
