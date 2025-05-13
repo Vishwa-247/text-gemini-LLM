@@ -56,7 +56,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-2xl mx-auto" // Decreased width from max-w-3xl to max-w-2xl
+      className="w-full max-w-2xl mx-auto mb-4" // Added bottom margin for more space
     >
       <div className="relative bg-background rounded-md border border-input">
         <Textarea
@@ -79,9 +79,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           <span className="sr-only">Send message</span>
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground text-center mt-1 mb-1">
-        AI can make mistakes. Verify important information.
-      </p>
+      {/* Removed the AI disclaimer text */}
     </form>
   );
 };

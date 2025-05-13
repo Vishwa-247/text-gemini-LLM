@@ -2,7 +2,7 @@
 import openai
 
 # Hardcoded API key for development
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
 OPENAI_MODEL = "gpt-4o-mini"
 
 def ask_openai(messages):

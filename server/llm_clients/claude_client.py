@@ -2,7 +2,7 @@
 import anthropic
 
 # Hardcoded API key for development
-ANTHROPIC_API_KEY = "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"
+ANTHROPIC_API_KEY = "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"
 ANTHROPIC_MODEL = "claude-3-sonnet-20240229"
 
 def ask_claude(messages):
