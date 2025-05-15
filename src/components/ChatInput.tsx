@@ -48,7 +48,7 @@ const ChatInput = ({
       textareaRef.current.style.height = `${newHeight}px`;
     }
   };
-  return <form onSubmit={handleSubmit} className="w-full max-w-2xl mb-6 px-0 mx-[67px]">
+  return <form onSubmit={handleSubmit} className="w-full max-w-2xl mb-6 px-0 mx-[200px]">
       <div className="relative bg-background rounded-md border border-input shadow-sm">
         <Textarea ref={textareaRef} value={message} onChange={handleTextareaChange} onKeyDown={handleKeyDown} placeholder="Type your message here..." className="resize-none pr-12 min-h-[50px] max-h-[120px] bg-transparent rounded-md w-full overflow-y-auto border-0 focus-visible:ring-1 focus-visible:ring-primary" disabled={disabled} />
         <Button ref={sendButtonRef} type="submit" size="icon" disabled={!message.trim() || disabled} className="absolute right-2 bottom-2">
