@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Menu } from "lucide-react";
 import { sendChatMessage, getChatHistory, ModelType } from "@/services/api";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEmptyStateAnimation, useScrollToBottom } from '@/hooks/use-gsap-animations';
 
 interface ChatProps {
